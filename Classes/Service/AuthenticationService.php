@@ -134,7 +134,7 @@ class AuthenticationService extends BaseAuthenticationService
             // Single Sign-On authentication
             if( $enableFrontendCAS ){
               // CAS authentication
-              $userRecordOrIsValid = Authentication::casAuthenticate( $this->login );
+              $userRecordOrIsValid = Authentication::casAuthenticate( $this->login, $remoteUser );
             } elseif ($enableFrontendSso || $enableBackendSso) {
                 // Strip the domain name
                 $domain = null;

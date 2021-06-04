@@ -38,7 +38,7 @@ class CasLogOffHook {
                 $casConfiguration = Configuration::getCASConfiguration();
 
                 phpCAS::client(CAS_VERSION_2_0, (string)$casConfiguration['host'], (integer)$casConfiguration['port'], '');
-                phpCAS::setCasServerCACert( '/etc/pki/tls/certs/ca-bundle.crt' );
+                phpCAS::setCasServerCACert( '/usr/local/share/ca-certificates/udes-ca.crt' );
                 if(isset($casConfiguration['logoutUrl'] ) && $casConfiguration['logoutUrl']  !=''){
                     phpCAS::logoutWithRedirectService($casConfiguration['logoutUrl']);
                 } else {

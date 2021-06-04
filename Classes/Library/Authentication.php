@@ -152,7 +152,8 @@ class Authentication
     /**
      *
      */
-    public static function casAuthenticate( $loginInfo ){
+    public static function casAuthenticate( $loginInfo, $username ){
+
       $casConfiguration = Configuration::getCASConfiguration();
       //the cookie timeout is set to 0 so unlimited because it's not the cookie's job to set the timeout
       $timeOutCookie = 0 ;
@@ -160,29 +161,28 @@ class Authentication
       $urlWithoutParam = GeneralUtility::getIndpEnv( 'TYPO3_REQUEST_URL' );
       $temps = explode('?',$urlWithoutParam);
       $urlWithoutParam = $temps[0];
-
       if( $params['ticket']||isset($loginInfo['status'])){
         // controle authentification by cas
         phpCAS::client(CAS_VERSION_2_0, (string)$casConfiguration['host'], (integer)$casConfiguration['port'], '');
-        phpCAS::setCasServerCACert( '/etc/pki/tls/certs/ca-bundle.crt' );
+        phpCAS::setCasServerCACert( '/usr/local/share/ca-certificates/udes-ca.crt' );
         if($loginInfo['status'] == 'login' && !phpCAS::isAuthenticated()) {
           phpCAS::forceAuthentication();
         }
         // logon typo3 user after a succesful connexion to cas server
         if ( phpCAS::isAuthenticated()) {
-          $TSFE = $GLOBALS['TSFE'];
-          self::$user = $TSFE->fe_user->fetchUserSession();
-          if( phpCAS::getUser() != self::$user['username'] ){
+          if ($username && Configuration::getValue('forceLowerCaseUsername')) {
+            // Possible enhancement: use \TYPO3\CMS\Core\Charset\CharsetConverter::conv_case instead
+            $username = strtolower($username);
+          }
+          if( phpCAS::getUser() != $username ){
             $typo3_user = self::ldapAuthenticate( phpCAS::getUser() );
             if ($typo3_user) {
               return $typo3_user;
             } else {
-              $TSFE = $GLOBALS['TSFE'];
-              $TSFE->fe_user->logoff();
               return false;
             }
           } else {
-            return self::$user;
+            return true;
           }
         }
       } else {
