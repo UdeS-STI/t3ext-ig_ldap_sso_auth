@@ -144,6 +144,9 @@
 			<trans-unit id="tx_igldapssoauth_config.group_membership.I.2">
 				<source>User contains the list of its associated groups</source>
 			</trans-unit>
+			<trans-unit id="tx_igldapssoauth_config.group_membership.I.3">
+          <source>Existing FE Groups gets its members from matching LDAP groups</source>
+      </trans-unit>
 			<trans-unit id="tx_igldapssoauth_config.group_membership.fe.missingUsergroupMapping">
 				<source><![CDATA[Mapping for field "usergroup" is missing in the configuration of frontend users. You may end up importing ALL groups in LDAP into TYPO3 and get users associated to wrong groups. Suggestion: usergroup = <memberOf>]]></source>
 			</trans-unit>
