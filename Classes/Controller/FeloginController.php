@@ -1,15 +1,25 @@
 <?php
 namespace Causal\IgLdapSsoAuth\Controller;
 
+use Psr\EventDispatcher\EventDispatcherInterface;
+use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use Causal\IgLdapSsoAuth\Library\Configuration;
+use TYPO3\CMS\FrontendLogin\Service\UserService;
 
 class FeloginController extends ActionController {
 
-    public function __construct(){
+    private $userService;
+    private $userAspect;
 
+    public function __construct(
+        UserService $userService,
+        EventDispatcherInterface $eventDispatcher
+    ) {
+        $this->userService = $userService;
+        $this->userAspect = GeneralUtility::makeInstance(Context::class)->getAspect('frontend.user');
     }
 
     public function indexAction(){
@@ -62,6 +72,14 @@ class FeloginController extends ActionController {
                 $url .= $sep . "logintype=login";
                 $authText = LocalizationUtility::translate( 'tx_igldapssoauth_pi1.label.login', 'ig_ldap_sso_auth', NULL);
             }
+
+            if ( $this->userAspect->isLoggedIn()) {
+                $userData = $this->userService->getFeUserData();
+            } else {
+              $userData = null;
+            }
+
+            $this->view->assign( 'user', $userData );
             $this->view->assign( 'authText', $authText );
             $this->view->assign( 'url', $url );
         }
