@@ -32,6 +32,7 @@ class Configuration
 
     const GROUP_MEMBERSHIP_FROM_GROUP = 1;
     const GROUP_MEMBERSHIP_FROM_MEMBER = 2;
+    const GROUP_MEMBERSHIP_MATCHING_LDAP = 3;
 
     const SERVER_OPENLDAP = 0;
     const SERVER_ACTIVE_DIRECTORY = 1;
@@ -130,6 +131,7 @@ class Configuration
         static::$be['CASAuthentication'] = false;
         static::$be['forceLowerCaseUsername'] = $globalConfiguration['forceLowerCaseUsername'] ? (bool)$globalConfiguration['forceLowerCaseUsername'] : false;
         static::$be['evaluateGroupsFromMembership'] = $configuration->getGroupMembership() === static::GROUP_MEMBERSHIP_FROM_MEMBER;
+        static::$be['evaluateGroupsFromLdapMembership'] = $configuration->getGroupMembership() === static::GROUP_MEMBERSHIP_MATCHING_LDAP;
         static::$be['IfUserExist'] = (bool)$globalConfiguration['TYPO3BEUserExist'];
         static::$be['IfGroupExist'] = (bool)$globalConfiguration['TYPO3BEGroupExist'];
         static::$be['BEfailsafe'] = (bool)$globalConfiguration['BEfailsafe'];
@@ -153,6 +155,7 @@ class Configuration
         static::$fe['SSOKeepDomainName'] = (bool)$globalConfiguration['keepFESSODomainName'];
         static::$fe['forceLowerCaseUsername'] = $globalConfiguration['forceLowerCaseUsername'] ? (bool)$globalConfiguration['forceLowerCaseUsername'] : false;
         static::$fe['evaluateGroupsFromMembership'] = $configuration->getGroupMembership() === static::GROUP_MEMBERSHIP_FROM_MEMBER;
+        static::$fe['evaluateGroupsFromLdapMembership'] = $configuration->getGroupMembership() === static::GROUP_MEMBERSHIP_MATCHING_LDAP;
         static::$fe['IfUserExist'] = (bool)$globalConfiguration['TYPO3FEUserExist'];
         static::$fe['IfGroupExist'] = (bool)$globalConfiguration['TYPO3FEGroupExist'];
         static::$fe['BEfailsafe'] = true;
