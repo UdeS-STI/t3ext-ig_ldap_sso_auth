@@ -255,9 +255,9 @@ return [
                         'EXT:ig_ldap_sso_auth/Resources/Public/Icons/selicon_group_membership_2.png'
                     ],
                     [
-                      'LLL:EXT:ig_ldap_sso_auth/Resources/Private/Language/locallang_db.xlf:tx_igldapssoauth_config.group_membership.I.3',
-                      \Causal\IgLdapSsoAuth\Library\Configuration::GROUP_MEMBERSHIP_MATCHING_LDAP,
-                      'EXT:ig_ldap_sso_auth/Resources/Public/Icons/selicon_group_membership_3.png'
+                        'LLL:EXT:ig_ldap_sso_auth/Resources/Private/Language/locallang_db.xlf:tx_igldapssoauth_config.group_membership.I.3',
+                        \Causal\IgLdapSsoAuth\Library\Configuration::GROUP_MEMBERSHIP_MATCHING_LDAP,
+                        'EXT:ig_ldap_sso_auth/Resources/Public/Icons/selicon_group_membership_3.png'
                     ],
                 ],
                 'minitems' => 1,
