@@ -17,6 +17,7 @@ namespace Causal\IgLdapSsoAuth\Library;
 use Causal\IgLdapSsoAuth\Domain\Repository\ConfigurationRepository;
 use phpCAS;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Causal\IgLdapSsoAuth\Library\LdapGroup;
 use Causal\IgLdapSsoAuth\Domain\Repository\Typo3GroupRepository;
 use Causal\IgLdapSsoAuth\Domain\Repository\Typo3UserRepository;
 
@@ -32,6 +33,7 @@ class Authentication
 
     protected static $config;
     protected static $lastAuthenticationDiagnostic;
+    protected static $user;
 
     /**
      * Temporary storage for LDAP groups (should be removed after some refactoring).
