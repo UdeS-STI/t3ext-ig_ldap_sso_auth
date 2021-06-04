@@ -46,7 +46,7 @@ defined('TYPO3_MODE') || die();
 
     if( $EXT_CONFIG['enableFECASAuthentication'] ){
       //Adding phpCAS class
-      require_once( \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath( $_EXTKEY ) . "/Resources/Private/PHP/phpCAS/CAS.php" );
+      //require_once( \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath( $_EXTKEY ) . "Resources/Private/PHP/phpCAS/CAS.php" );
       //Adding a log off pre-processor hook
       $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['logoff_post_processing'][$_EXTKEY] = 'Causal\IgLdapSsoAuth\Hooks\CasLogOffHook->postProcessing';
     }
@@ -94,4 +94,12 @@ defined('TYPO3_MODE') || die();
 
     // User have save doc new button
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addUserTSConfig('options.saveDocNew.tx_igldapssoauth_config=1');
+
+    \TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
+      'Causal.' . $_EXTKEY,
+      'Pi1',
+      array('Felogin' => 'index'),
+      array('Felogin' => 'index')
+    );
 })('ig_ldap_sso_auth');
+
