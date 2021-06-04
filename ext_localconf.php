@@ -44,6 +44,13 @@ defined('TYPO3_MODE') || die();
         $subTypes = implode(',', $subTypesArr);
     }
 
+    if( $EXT_CONFIG['enableFECASAuthentication'] ){
+      //Adding phpCAS class
+      require_once( \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath( $_EXTKEY ) . "/Resources/Private/PHP/phpCAS/CAS.php" );
+      //Adding a log off pre-processor hook
+      $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['logoff_post_processing'][$_EXTKEY] = 'Causal\IgLdapSsoAuth\Hooks\CasLogOffHook->postProcessing';
+    }
+
     // Register hook for \TYPO3\CMS\Core\DataHandling\DataHandler
     $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] = \Causal\IgLdapSsoAuth\Hooks\DataHandler::class;
 
