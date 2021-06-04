@@ -159,7 +159,7 @@ class Ldap
                 }
 
                 // If enable, SSO authentication without password
-            } elseif ($password === null && Configuration::getValue('SSOAuthentication')) {
+            } elseif ($password === null && Configuration::getValue('SSOAuthentication') || Configuration::getValue('CASAuthentication'))) {
 
                 return $this->ldapUtility->getDn();
 

@@ -528,7 +528,7 @@ class Authentication
         $ldapInstance = Ldap::getInstance();
         $ldapInstance->connect(Configuration::getLdapConfiguration());
 
-        if (Configuration::getValue('evaluateGroupsFromMembership')) {
+        if (Configuration::getValue('evaluateGroupsFromMembership')  == Configuration::GROUP_MEMBERSHIP_FROM_MEMBER ) {
             // Get LDAP groups from membership attribute
             if ($membership = LdapGroup::getMembership($ldapUser, static::$config['users']['mapping'])) {
                 $ldapGroups = LdapGroup::selectFromMembership(

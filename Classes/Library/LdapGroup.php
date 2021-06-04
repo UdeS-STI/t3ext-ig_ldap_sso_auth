@@ -122,4 +122,13 @@ class LdapGroup
         return false;
     }
 
+    public static function isMemberOfLDAPGroup( $userDn, $groupDN )
+    {
+        $groups = Ldap::getInstance()->search(
+            Ldap::getInstance()->escapeDnForFilter( $groupDN ),
+            "(member=" . Ldap::getInstance()->escapeDnForFilter( $userDn ) . ")",
+            array( 'cn' ) );
+        return ( $groups['count'] > 0 )? true : false;
+    }
+
 }
