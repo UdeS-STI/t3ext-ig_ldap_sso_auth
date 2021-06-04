@@ -64,3 +64,12 @@ defined('TYPO3_MODE') || die();
     // Initialize "context sensitive help" (csh)
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addLLrefForTCAdescr('tx_igldapssoauth_config', 'EXT:ig_ldap_sso_auth/Resources/Private/Language/locallang_csh_db.xlf');
 })('ig_ldap_sso_auth');
+
+$extensionName = strtolower(\TYPO3\CMS\Core\Utility\GeneralUtility::underscoredToUpperCamelCase($_EXTKEY));
+
+$pluginUniqueName = 'Pi1';
+\TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerPlugin(
+  'Causal.' . $_EXTKEY,
+  $pluginUniqueName,
+  'LLL:EXT:ig_ldap_sso_auth/Resources/Private/Language/locallang_db.xlf:tx_igldapssoauth_pi1.title'
+);
