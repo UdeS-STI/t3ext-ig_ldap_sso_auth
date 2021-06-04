@@ -15,6 +15,7 @@
 namespace Causal\IgLdapSsoAuth\Library;
 
 use Causal\IgLdapSsoAuth\Domain\Repository\ConfigurationRepository;
+use phpCAS;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Causal\IgLdapSsoAuth\Domain\Repository\Typo3GroupRepository;
 use Causal\IgLdapSsoAuth\Domain\Repository\Typo3UserRepository;
@@ -146,6 +147,47 @@ class Authentication
         static::getLogger()->warning('Cannot connect to LDAP or username is empty', ['username' => $username]);
         $ldapInstance->disconnect();
         return false;
+    }
+
+    /**
+     *
+     */
+    public static function casAuthenticate( $loginInfo ){
+      $casConfiguration = Configuration::getCASConfiguration();
+      //the cookie timeout is set to 0 so unlimited because it's not the cookie's job to set the timeout
+      $timeOutCookie = 0 ;
+      $params = GeneralUtility::_GET();
+      $urlWithoutParam = GeneralUtility::getIndpEnv( 'TYPO3_REQUEST_URL' );
+      $temps = explode('?',$urlWithoutParam);
+      $urlWithoutParam = $temps[0];
+
+      if( $params['ticket']||isset($loginInfo['status'])){
+        // controle authentification by cas
+        phpCAS::client(CAS_VERSION_2_0, (string)$casConfiguration['host'], (integer)$casConfiguration['port'], '');
+        phpCAS::setCasServerCACert( '/etc/pki/tls/certs/ca-bundle.crt' );
+        if($loginInfo['status'] == 'login' && !phpCAS::isAuthenticated()) {
+          phpCAS::forceAuthentication();
+        }
+        // logon typo3 user after a succesful connexion to cas server
+        if ( phpCAS::isAuthenticated()) {
+          $TSFE = $GLOBALS['TSFE'];
+          self::$user = $TSFE->fe_user->fetchUserSession();
+          if( phpCAS::getUser() != self::$user['username'] ){
+            $typo3_user = self::ldapAuthenticate( phpCAS::getUser() );
+            if ($typo3_user) {
+              return $typo3_user;
+            } else {
+              $TSFE = $GLOBALS['TSFE'];
+              $TSFE->fe_user->logoff();
+              return false;
+            }
+          } else {
+            return self::$user;
+          }
+        }
+      } else {
+        return false;
+      }
     }
 
     /**

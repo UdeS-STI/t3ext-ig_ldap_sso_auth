@@ -151,12 +151,15 @@ class ModuleController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionControlle
             $backendConfiguration = ['LDAPAuthentication' => false];
         }
 
+        $casConfiguration = Configuration::getCASConfiguration();
+
         $this->view->assign('configuration', [
             'domains' => Configuration::getDomains(),
             'ldap' => $ldapConfiguration,
             'connection' => $connectionStatus,
             'frontend' => $frontendConfiguration,
             'backend' => $backendConfiguration,
+            'cas' => $casConfiguration
         ]);
     }
 

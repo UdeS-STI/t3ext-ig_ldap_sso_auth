@@ -46,6 +46,7 @@ class Configuration
     protected static $fe = [];
     protected static $ldap = [];
     protected static $domains = [];
+    protected static $cas = array();
 
     /**
      * Initializes the configuration class.
@@ -126,6 +127,7 @@ class Configuration
         static::$be['LDAPAuthentication'] = (bool)$globalConfiguration['enableBELDAPAuthentication'];
         static::$be['SSOAuthentication'] = (bool)$globalConfiguration['enableBESSO'];
         static::$be['SSOKeepDomainName'] = (bool)$globalConfiguration['keepBESSODomainName'];
+        static::$be['CASAuthentication'] = false;
         static::$be['forceLowerCaseUsername'] = $globalConfiguration['forceLowerCaseUsername'] ? (bool)$globalConfiguration['forceLowerCaseUsername'] : false;
         static::$be['evaluateGroupsFromMembership'] = $configuration->getGroupMembership() === static::GROUP_MEMBERSHIP_FROM_MEMBER;
         static::$be['IfUserExist'] = (bool)$globalConfiguration['TYPO3BEUserExist'];
@@ -147,6 +149,7 @@ class Configuration
 
         static::$fe['LDAPAuthentication'] = (bool)$globalConfiguration['enableFELDAPAuthentication'];
         static::$fe['SSOAuthentication'] = (bool)$globalConfiguration['enableFESSO'];
+        static::$fe['CASAuthentication'] = (bool)$globalConfiguration['enableFECASAuthentication'];
         static::$fe['SSOKeepDomainName'] = (bool)$globalConfiguration['keepFESSODomainName'];
         static::$fe['forceLowerCaseUsername'] = $globalConfiguration['forceLowerCaseUsername'] ? (bool)$globalConfiguration['forceLowerCaseUsername'] : false;
         static::$fe['evaluateGroupsFromMembership'] = $configuration->getGroupMembership() === static::GROUP_MEMBERSHIP_FROM_MEMBER;
@@ -176,6 +179,12 @@ class Configuration
         static::$ldap['ssl'] = $configuration->isLdapSsl();
         static::$ldap['binddn'] = $configuration->getLdapBindDn();
         static::$ldap['password'] = $configuration->getLdapPassword();
+
+        static::$cas['host'] = $configuration->getCASHost();
+        static::$cas['port'] = $configuration->getCASPort();
+        static::$cas['logoutUrl'] = $configuration->getCASLogoutUrl();
+        static::$cas['serviceUrl'] = $configuration->getCASServiceUrl();
+        static::$cas['uri'] = $configuration->getCASUri();
     }
 
     /**
@@ -334,6 +343,16 @@ class Configuration
     public static function getBackendConfiguration()
     {
         return static::$be;
+    }
+
+    /**
+     * Gets the CAS configuration
+     *
+     * @return array
+     */
+    public static function getCASConfiguration()
+    {
+      return static::$cas;
     }
 
     /**
