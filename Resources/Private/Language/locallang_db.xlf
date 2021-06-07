@@ -63,6 +63,9 @@
 			<trans-unit id="settings.enableFESSO">
 				<source>Frontend SSO: Enable Single Sign-On for Frontend users.</source>
 			</trans-unit>
+			<trans-unit id="settings.enableFECASAuthentication">
+          <source>Frontend CAS Authentication: Enable CAS Authentication for Frontend users.</source>
+      </trans-unit>
 			<trans-unit id="settings.keepFESSODomainName">
 				<source>Frontend SSO: Keep the domain name after a successful login (for example on a CAS-Server), to continue the chain of authentication through LDAP.</source>
 			</trans-unit>
@@ -81,6 +84,22 @@
 			<trans-unit id="tx_igldapssoauth_config.sites">
 				<source>Associated site configurations:</source>
 			</trans-unit>
+
+			<trans-unit id="tx_igldapssoauth_config.cas_host">
+          <source>Host :</source>
+      </trans-unit>
+      <trans-unit id="tx_igldapssoauth_config.cas_port">
+          <source>Port :</source>
+      </trans-unit>
+      <trans-unit id="tx_igldapssoauth_config.cas_uri">
+          <source>Uri :</source>
+      </trans-unit>
+      <trans-unit id="tx_igldapssoauth_config.cas_logout_url">
+          <source>Back URL :</source>
+      </trans-unit>
+      <trans-unit id="tx_igldapssoauth_config.cas_service_url">
+          <source>Service URL :</source>
+      </trans-unit>
 
 			<trans-unit id="tx_igldapssoauth_config.ldap_server">
 				<source>Server Type:</source>
@@ -125,6 +144,9 @@
 			<trans-unit id="tx_igldapssoauth_config.group_membership.I.2">
 				<source>User contains the list of its associated groups</source>
 			</trans-unit>
+			<trans-unit id="tx_igldapssoauth_config.group_membership.I.3">
+          <source>Existing FE Groups gets its members from matching LDAP groups</source>
+      </trans-unit>
 			<trans-unit id="tx_igldapssoauth_config.group_membership.fe.missingUsergroupMapping">
 				<source><![CDATA[Mapping for field "usergroup" is missing in the configuration of frontend users. You may end up importing ALL groups in LDAP into TYPO3 and get users associated to wrong groups. Suggestion: usergroup = <memberOf>]]></source>
 			</trans-unit>
@@ -223,6 +245,16 @@
 			<trans-unit id="suggestion.copy">
 				<source>copy and use</source>
 			</trans-unit>
+
+			<trans-unit id="tx_igldapssoauth_pi1.title">
+        <source>UdeS - Front end login</source>
+      </trans-unit>
+      <trans-unit id="tx_igldapssoauth_pi1.label.login">
+        <source>Connexion</source>
+      </trans-unit>
+      <trans-unit id="tx_igldapssoauth_pi1.label.logout">
+        <source>Déconnexion</source>
+      </trans-unit>
 		</body>
 	</file>
 </xliff>

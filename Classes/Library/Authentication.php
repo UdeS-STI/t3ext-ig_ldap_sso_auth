@@ -15,7 +15,10 @@
 namespace Causal\IgLdapSsoAuth\Library;
 
 use Causal\IgLdapSsoAuth\Domain\Repository\ConfigurationRepository;
+use phpCAS;
+use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Causal\IgLdapSsoAuth\Library\LdapGroup;
 use Causal\IgLdapSsoAuth\Domain\Repository\Typo3GroupRepository;
 use Causal\IgLdapSsoAuth\Domain\Repository\Typo3UserRepository;
 
@@ -31,6 +34,7 @@ class Authentication
 
     protected static $config;
     protected static $lastAuthenticationDiagnostic;
+    protected static $user;
 
     /**
      * Temporary storage for LDAP groups (should be removed after some refactoring).
@@ -146,6 +150,47 @@ class Authentication
         static::getLogger()->warning('Cannot connect to LDAP or username is empty', ['username' => $username]);
         $ldapInstance->disconnect();
         return false;
+    }
+
+    /**
+     *
+     */
+    public static function casAuthenticate( $loginInfo, $username ){
+
+      $casConfiguration = Configuration::getCASConfiguration();
+      //the cookie timeout is set to 0 so unlimited because it's not the cookie's job to set the timeout
+      $timeOutCookie = 0 ;
+      $params = GeneralUtility::_GET();
+      $urlWithoutParam = GeneralUtility::getIndpEnv( 'TYPO3_REQUEST_URL' );
+      $temps = explode('?',$urlWithoutParam);
+      $urlWithoutParam = $temps[0];
+      if( $params['ticket']||isset($loginInfo['status'])){
+        // controle authentification by cas
+        phpCAS::client(CAS_VERSION_2_0, (string)$casConfiguration['host'], (integer)$casConfiguration['port'], '');
+        phpCAS::setCasServerCACert( '/usr/local/share/ca-certificates/udes-ca.crt' );
+        if($loginInfo['status'] == 'login' && !phpCAS::isAuthenticated()) {
+          phpCAS::forceAuthentication();
+        }
+        // logon typo3 user after a succesful connexion to cas server
+        if ( phpCAS::isAuthenticated()) {
+          if ($username && Configuration::getValue('forceLowerCaseUsername')) {
+            // Possible enhancement: use \TYPO3\CMS\Core\Charset\CharsetConverter::conv_case instead
+            $username = strtolower($username);
+          }
+          if( phpCAS::getUser() != $username ){
+            $typo3_user = self::ldapAuthenticate( phpCAS::getUser() );
+            if ($typo3_user) {
+              return $typo3_user;
+            } else {
+              return false;
+            }
+          } else {
+            return true;
+          }
+        }
+      } else {
+        return false;
+      }
     }
 
     /**
@@ -351,90 +396,114 @@ class Authentication
                 return null;
             }
         } else {
+          if( !Configuration::getValue( 'evaluateGroupsFromLdapMembership' ) ) {
             // Get pid from group mapping
-            $typo3GroupPid = Configuration::getPid($configuration['groups']['mapping']);
+            $typo3GroupPid = Configuration::getPid( $configuration['groups']['mapping'] );
 
             $typo3GroupsTemp = static::getTypo3Groups(
-                $ldapGroups,
-                $groupTable,
-                $typo3GroupPid,
-                $configuration['groups']['mapping']
+              $ldapGroups,
+              $groupTable,
+              $typo3GroupPid,
+              $configuration['groups']['mapping']
             );
 
-            if (count($requiredLDAPGroups) > 0) {
-                $hasRequired = false;
-                $groupUids = [];
-                foreach ($typo3GroupsTemp as $typo3Group) {
-                    $groupUids[] = $typo3Group['uid'];
+            if ( count( $requiredLDAPGroups ) > 0 ) {
+              $hasRequired = false;
+              $groupUids = [];
+              foreach ( $typo3GroupsTemp as $typo3Group ) {
+                $groupUids[] = $typo3Group['uid'];
+              }
+              foreach ( $requiredLDAPGroups as $group ) {
+                if ( in_array( $group->getUid(), $groupUids ) ) {
+                  $hasRequired = true;
+                  break;
                 }
-                foreach ($requiredLDAPGroups as $group) {
-                    if (in_array($group->getUid(), $groupUids)) {
-                        $hasRequired = true;
-                        break;
-                    }
-                }
-                if (!$hasRequired) {
-                    return null;
-                }
+              }
+              if ( !$hasRequired ) {
+                return null;
+              }
             }
 
-            if (Configuration::getValue('IfGroupExist') && count($typo3GroupsTemp) === 0) {
-                return [];
+            if ( Configuration::getValue( 'IfGroupExist' ) && count( $typo3GroupsTemp ) === 0 ) {
+              return [];
             }
 
             $i = 0;
-            foreach ($typo3GroupsTemp as $typo3Group) {
-                if (Configuration::getValue('GroupsNotSynchronize') && empty($typo3Group['uid'])) {
-                    // Groups should not get synchronized and the current group is invalid
-                    continue;
-                }
-                if (Configuration::getValue('GroupsNotSynchronize')) {
-                    $typo3_groups[] = $typo3Group;
-                } elseif (empty($typo3Group['uid'])) {
-                    $newGroup = Typo3GroupRepository::add(
-                        $groupTable,
-                        $typo3Group
-                    );
+            foreach ( $typo3GroupsTemp as $typo3Group ) {
+              if ( Configuration::getValue( 'GroupsNotSynchronize' ) && empty( $typo3Group['uid'] ) ) {
+                // Groups should not get synchronized and the current group is invalid
+                continue;
+              }
+              if ( Configuration::getValue( 'GroupsNotSynchronize' ) ) {
+                $typo3_groups[] = $typo3Group;
+              } elseif ( empty( $typo3Group['uid'] ) ) {
+                $newGroup = Typo3GroupRepository::add(
+                  $groupTable,
+                  $typo3Group
+                );
 
-                    $typo3_group_merged = static::merge(
-                        $ldapGroups[$i],
-                        $newGroup,
-                        $configuration['groups']['mapping']
-                    );
+                $typo3_group_merged = static::merge(
+                  $ldapGroups[$i],
+                  $newGroup,
+                  $configuration['groups']['mapping']
+                );
 
-                    Typo3GroupRepository::update(
-                        $groupTable,
-                        $typo3_group_merged
-                    );
+                Typo3GroupRepository::update(
+                  $groupTable,
+                  $typo3_group_merged
+                );
 
-                    $typo3Group = Typo3GroupRepository::fetch(
-                        $groupTable,
-                        $typo3_group_merged['uid']
-                    );
-                    $typo3_groups[] = $typo3Group[0];
-                } else {
-                    // Restore group that may have been previously deleted
-                    $typo3Group['deleted'] = 0;
-                    $typo3_group_merged = static::merge(
-                        $ldapGroups[$i],
-                        $typo3Group,
-                        $configuration['groups']['mapping']
-                    );
+                $typo3Group = Typo3GroupRepository::fetch(
+                  $groupTable,
+                  $typo3_group_merged['uid']
+                );
+                $typo3_groups[] = $typo3Group[0];
+              } else {
+                // Restore group that may have been previously deleted
+                $typo3Group['deleted'] = 0;
+                $typo3_group_merged = static::merge(
+                  $ldapGroups[$i],
+                  $typo3Group,
+                  $configuration['groups']['mapping']
+                );
 
-                    Typo3GroupRepository::update(
-                        $groupTable,
-                        $typo3_group_merged
-                    );
+                Typo3GroupRepository::update(
+                  $groupTable,
+                  $typo3_group_merged
+                );
 
-                    $typo3Group = Typo3GroupRepository::fetch(
-                        $groupTable,
-                        $typo3_group_merged['uid']
-                    );
-                    $typo3_groups[] = $typo3Group[0];
-                }
+                $typo3Group = Typo3GroupRepository::fetch(
+                  $groupTable,
+                  $typo3_group_merged['uid']
+                );
+                $typo3_groups[] = $typo3Group[0];
+              }
 
-                $i++;
+              $i++;
             }
+          } else {
+            // choosen option: GROUP_MEMBERSHIP_MATCHING_LDAP (added by UdeS)
+            $table = 'fe_groups';
+              $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
+                  ->getQueryBuilderForTable($table);
+              $queryBuilder->getRestrictions()->removeAll();
+
+              $allTypo3FEGroups = $queryBuilder
+                  ->select('*')
+                  ->from($table)
+                  #->where($where)
+                  ->execute()
+                  ->fetchAll();
+
+            foreach( $allTypo3FEGroups as $typo3FEGroup ){
+              if( $typo3FEGroup['tx_igldapssoauth_dn'] != '' && LdapGroup::isMemberOfLDAPGroup( $ldapUser['dn'], $typo3FEGroup['tx_igldapssoauth_dn'] ) ){
+                $typo3_groups[] = $typo3FEGroup;
+              }
+              if( $typo3FEGroup['title'] == '__tout-udes' ){
+                $typo3_groups[] = $typo3FEGroup;
+              }
+            }
+          }
         }
         // Hook for processing the groups
         if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['ig_ldap_sso_auth']['getGroupsProcessing'])) {
@@ -470,7 +539,7 @@ class Authentication
         $ldapInstance = Ldap::getInstance();
         $ldapInstance->connect(Configuration::getLdapConfiguration());
 
-        if (Configuration::getValue('evaluateGroupsFromMembership')) {
+        if (Configuration::getValue('evaluateGroupsFromMembership')  == Configuration::GROUP_MEMBERSHIP_FROM_MEMBER ) {
             // Get LDAP groups from membership attribute
             if ($membership = LdapGroup::getMembership($ldapUser, static::$config['users']['mapping'])) {
                 $ldapGroups = LdapGroup::selectFromMembership(

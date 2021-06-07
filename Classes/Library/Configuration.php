@@ -32,6 +32,7 @@ class Configuration
 
     const GROUP_MEMBERSHIP_FROM_GROUP = 1;
     const GROUP_MEMBERSHIP_FROM_MEMBER = 2;
+    const GROUP_MEMBERSHIP_MATCHING_LDAP = 3;
 
     const SERVER_OPENLDAP = 0;
     const SERVER_ACTIVE_DIRECTORY = 1;
@@ -46,6 +47,7 @@ class Configuration
     protected static $fe = [];
     protected static $ldap = [];
     protected static $domains = [];
+    protected static $cas = array();
 
     /**
      * Initializes the configuration class.
@@ -126,8 +128,10 @@ class Configuration
         static::$be['LDAPAuthentication'] = (bool)$globalConfiguration['enableBELDAPAuthentication'];
         static::$be['SSOAuthentication'] = (bool)$globalConfiguration['enableBESSO'];
         static::$be['SSOKeepDomainName'] = (bool)$globalConfiguration['keepBESSODomainName'];
+        static::$be['CASAuthentication'] = false;
         static::$be['forceLowerCaseUsername'] = $globalConfiguration['forceLowerCaseUsername'] ? (bool)$globalConfiguration['forceLowerCaseUsername'] : false;
         static::$be['evaluateGroupsFromMembership'] = $configuration->getGroupMembership() === static::GROUP_MEMBERSHIP_FROM_MEMBER;
+        static::$be['evaluateGroupsFromLdapMembership'] = $configuration->getGroupMembership() === static::GROUP_MEMBERSHIP_MATCHING_LDAP;
         static::$be['IfUserExist'] = (bool)$globalConfiguration['TYPO3BEUserExist'];
         static::$be['IfGroupExist'] = (bool)$globalConfiguration['TYPO3BEGroupExist'];
         static::$be['BEfailsafe'] = (bool)$globalConfiguration['BEfailsafe'];
@@ -147,9 +151,11 @@ class Configuration
 
         static::$fe['LDAPAuthentication'] = (bool)$globalConfiguration['enableFELDAPAuthentication'];
         static::$fe['SSOAuthentication'] = (bool)$globalConfiguration['enableFESSO'];
+        static::$fe['CASAuthentication'] = (bool)$globalConfiguration['enableFECASAuthentication'];
         static::$fe['SSOKeepDomainName'] = (bool)$globalConfiguration['keepFESSODomainName'];
         static::$fe['forceLowerCaseUsername'] = $globalConfiguration['forceLowerCaseUsername'] ? (bool)$globalConfiguration['forceLowerCaseUsername'] : false;
         static::$fe['evaluateGroupsFromMembership'] = $configuration->getGroupMembership() === static::GROUP_MEMBERSHIP_FROM_MEMBER;
+        static::$fe['evaluateGroupsFromLdapMembership'] = $configuration->getGroupMembership() === static::GROUP_MEMBERSHIP_MATCHING_LDAP;
         static::$fe['IfUserExist'] = (bool)$globalConfiguration['TYPO3FEUserExist'];
         static::$fe['IfGroupExist'] = (bool)$globalConfiguration['TYPO3FEGroupExist'];
         static::$fe['BEfailsafe'] = true;
@@ -176,6 +182,12 @@ class Configuration
         static::$ldap['ssl'] = $configuration->isLdapSsl();
         static::$ldap['binddn'] = $configuration->getLdapBindDn();
         static::$ldap['password'] = $configuration->getLdapPassword();
+
+        static::$cas['host'] = $configuration->getCASHost();
+        static::$cas['port'] = $configuration->getCASPort();
+        static::$cas['logoutUrl'] = $configuration->getCASLogoutUrl();
+        static::$cas['serviceUrl'] = $configuration->getCASServiceUrl();
+        static::$cas['uri'] = $configuration->getCASUri();
     }
 
     /**
@@ -334,6 +346,16 @@ class Configuration
     public static function getBackendConfiguration()
     {
         return static::$be;
+    }
+
+    /**
+     * Gets the CAS configuration
+     *
+     * @return array
+     */
+    public static function getCASConfiguration()
+    {
+      return static::$cas;
     }
 
     /**
