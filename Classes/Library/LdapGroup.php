@@ -124,7 +124,9 @@ class LdapGroup
 
     public static function isMemberOfLDAPGroup( $userDn, $groupDN )
     {
-        $groups = Ldap::getInstance()->search(
+        $ldapInstance = Ldap::getInstance();
+        $ldapInstance->connect(Configuration::getLdapConfiguration());
+        $groups = $ldapInstance->search(
             Ldap::getInstance()->escapeDnForFilter( $groupDN ),
             "(member=" . Ldap::getInstance()->escapeDnForFilter( $userDn ) . ")",
             array( 'cn' ) );
