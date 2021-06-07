@@ -16,6 +16,7 @@ namespace Causal\IgLdapSsoAuth\Library;
 
 use Causal\IgLdapSsoAuth\Domain\Repository\ConfigurationRepository;
 use phpCAS;
+use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Causal\IgLdapSsoAuth\Library\LdapGroup;
 use Causal\IgLdapSsoAuth\Domain\Repository\Typo3GroupRepository;
@@ -482,8 +483,18 @@ class Authentication
             }
           } else {
             // choosen option: GROUP_MEMBERSHIP_MATCHING_LDAP (added by UdeS)
+            $table = 'fe_groups';
+              $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
+                  ->getQueryBuilderForTable($table);
+              $queryBuilder->getRestrictions()->removeAll();
 
-            $allTypo3FEGroups = Typo3GroupRepository::fetch('fe_groups', 0, 0 );
+              $allTypo3FEGroups = $queryBuilder
+                  ->select('*')
+                  ->from($table)
+                  #->where($where)
+                  ->execute()
+                  ->fetchAll();
+
             foreach( $allTypo3FEGroups as $typo3FEGroup ){
               if( $typo3FEGroup['tx_igldapssoauth_dn'] != '' && LdapGroup::isMemberOfLDAPGroup( $ldapUser['dn'], $typo3FEGroup['tx_igldapssoauth_dn'] ) ){
                 $typo3_groups[] = $typo3FEGroup;
