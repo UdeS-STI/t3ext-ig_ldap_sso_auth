@@ -186,6 +186,31 @@ class Configuration
     protected $frontendGroupsAssigned;
 
     /**
+     * @var string
+     */
+    protected $CASHost;
+
+    /**
+     * @var int;
+     */
+    protected $CASPort;
+
+    /**
+     * @var string;
+     */
+    protected $CASLogoutUrl;
+
+    /**
+     * @var string;
+     */
+    protected $CASServiceUrl;
+
+    /**
+     * @var string;
+     */
+    protected $CASUri;
+
+    /**
      * Getter for uid.
      *
      * @return int the uid or null if none set yet.
@@ -492,6 +517,41 @@ class Configuration
     public function __toString()
     {
         return get_class($this) . ':' . (string)$this->uid;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCASHost(){
+      return $this->CASHost;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCASPort(){
+      return $this->CASPort;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCASLogoutUrl(){
+      return $this->CASLogoutUrl;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCASServiceUrl(){
+      return $this->CASServiceUrl;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCASUri(){
+      return $this->CASUri;
     }
 
 }

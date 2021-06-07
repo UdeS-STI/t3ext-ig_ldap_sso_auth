@@ -122,4 +122,24 @@ class LdapGroup
         return false;
     }
 
+    /**
+     * Check if a user is member of an ldap group
+     *
+     * @param $userDn
+     * @param $groupDN
+     * @return bool
+     * @throws \Causal\IgLdapSsoAuth\Exception\UnresolvedPhpDependencyException
+     * @throws \TYPO3\CMS\Extbase\Object\Exception
+     */
+    public static function isMemberOfLDAPGroup( $userDn, $groupDN )
+    {
+        $ldapInstance = Ldap::getInstance();
+        $ldapInstance->connect(Configuration::getLdapConfiguration());
+        $groups = $ldapInstance->search(
+            Ldap::getInstance()->escapeDnForFilter( $groupDN ),
+            "(member=" . Ldap::getInstance()->escapeDnForFilter( $userDn ) . ")",
+            array( 'cn' ) );
+        return ( $groups['count'] > 0 )? true : false;
+    }
+
 }

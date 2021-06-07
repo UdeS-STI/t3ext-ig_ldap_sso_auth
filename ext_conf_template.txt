@@ -57,3 +57,6 @@ enableFESSO = 0
 
 # cat=frontend/enable; type=boolean; label=LLL:EXT:ig_ldap_sso_auth/Resources/Private/Language/locallang_db.xlf:settings.keepFESSODomainName
 keepFESSODomainName = 0
+
+# cat=frontend/enable; type=boolean; label=LLL:EXT:ig_ldap_sso_auth/Resources/Private/Language/locallang_db.xlf:settings.enableFECASAuthentication
+enableFECASAuthentication = 1

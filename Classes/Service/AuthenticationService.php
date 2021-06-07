@@ -94,6 +94,7 @@ class AuthenticationService extends BaseAuthenticationService
         $userRecordOrIsValid = false;
         $remoteUser = $this->getRemoteUser();
         $enableFrontendSso = TYPO3_MODE === 'FE' && (bool)$this->config['enableFESSO'] && $remoteUser;
+        $enableFrontendCAS = TYPO3_MODE === 'FE' && (bool)$this->config['enableFECASAuthentication'] ;
         $enableBackendSso = TYPO3_MODE === 'BE' && (bool)$this->config['enableBESSO'] && $remoteUser;
 
         // This simple check is the key to prevent your log being filled up with warnings
@@ -101,7 +102,7 @@ class AuthenticationService extends BaseAuthenticationService
         // the authentication stack to always fetch the user:
         // $TYPO3_CONF_VARS['SVCONF']['auth']['setup']['BE_alwaysFetchUser'] = true;
         // This is the case, e.g., when using EXT:crawler.
-        if ($this->login['status'] !== 'login' && !($enableFrontendSso || $enableBackendSso)) {
+        if ($this->login['status'] !== 'login' && !($enableFrontendSso || $enableBackendSso || $enableFrontendCAS)) {
             return $user;
         }
 
@@ -131,7 +132,10 @@ class AuthenticationService extends BaseAuthenticationService
             $userRecordOrIsValid = false;
 
             // Single Sign-On authentication
-            if ($enableFrontendSso || $enableBackendSso) {
+            if( $enableFrontendCAS ){
+              // CAS authentication
+              $userRecordOrIsValid = Authentication::casAuthenticate( $this->login, $remoteUser );
+            } elseif ($enableFrontendSso || $enableBackendSso) {
                 // Strip the domain name
                 $domain = null;
                 if (!Configuration::getValue('SSOKeepDomainName')) {
@@ -242,9 +246,10 @@ class AuthenticationService extends BaseAuthenticationService
 
         $remoteUser = $this->getRemoteUser();
         $enableFrontendSso = TYPO3_MODE === 'FE' && (bool)$this->config['enableFESSO'] && $remoteUser;
+        $enableFrontendCAS = TYPO3_MODE === 'FE' && (bool)$this->config['enableFECASAuthentication'];
         $enableBackendSso = TYPO3_MODE === 'BE' && (bool)$this->config['enableBESSO'] && $remoteUser;
 
-        if ((($this->login['uident'] && $this->login['uname']) || $enableFrontendSso || $enableBackendSso) && !empty($user['tx_igldapssoauth_dn'])) {
+        if ((($this->login['uident'] && $this->login['uname']) || $enableFrontendSso || $enableBackendSso || $enableFrontendCAS) && !empty($user['tx_igldapssoauth_dn'])) {
             if (isset($user['tx_igldapssoauth_from'])) {
                 $status = static::STATUS_AUTHENTICATION_SUCCESS_BREAK;
             } elseif (TYPO3_MODE === 'BE' && Configuration::getValue('BEfailsafe')) {

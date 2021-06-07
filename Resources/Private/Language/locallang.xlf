@@ -305,6 +305,16 @@
 			<trans-unit id="task.import_users.field.restoreduserhandling.nothing">
 				<source>Do nothing</source>
 			</trans-unit>
+
+			<trans-unit id="tx_igldapssoauth_pi1.title">
+          <source>UdeS - Front end login</source>
+      </trans-unit>
+      <trans-unit id="tx_igldapssoauth_pi1.label.login">
+          <source>Connexion</source>
+      </trans-unit>
+      <trans-unit id="tx_igldapssoauth_pi1.label.logout">
+          <source>Déconnexion</source>
+      </trans-unit>
 		</body>
 	</file>
 </xliff>

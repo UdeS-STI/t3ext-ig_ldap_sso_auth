@@ -38,7 +38,9 @@ return [
                     --div--;BE_USERS,
                         be_users_basedn, be_users_filter, be_users_mapping, be_groups_required, be_groups_assigned,
                     --div--;BE_GROUPS,
-                        be_groups_basedn, be_groups_filter, be_groups_mapping, be_groups_admin'
+                        be_groups_basedn, be_groups_filter, be_groups_mapping, be_groups_admin,
+                    --div--;CAS,
+                        cas_host, cas_port, cas_logout_url, cas_service_url, cas_uri'
         ],
     ],
     'palettes' => [
@@ -185,6 +187,57 @@ return [
                 'eval' => 'password',
             ]
         ],
+        "cas_host" => Array (
+          "exclude" => 1,
+          "label" => "LLL:EXT:ig_ldap_sso_auth/Resources/Private/Language/locallang_db.xlf:tx_igldapssoauth_config.cas_host",
+          "config" => Array (
+            "type" => "input",
+            "size" => "30",
+            "max" => "255",
+            "eval" => "trim",
+          )
+        ),
+
+        "cas_uri" => Array (
+          "exclude" => 1,
+          "label" => "LLL:EXT:ig_ldap_sso_auth/Resources/Private/Language/locallang_db.xlf:tx_igldapssoauth_config.cas_uri",
+          "config" => Array (
+            "type" => "input",
+            "size" => "30",
+            "max" => "255",
+            "eval" => "trim",
+          )
+        ),
+        "cas_service_url" => Array (
+          "exclude" => 1,
+          "label" => "LLL:EXT:ig_ldap_sso_auth/Resources/Private/Language/locallang_db.xlf:tx_igldapssoauth_config.cas_service_url",
+          "config" => Array (
+            "type" => "input",
+            "size" => "30",
+            "max" => "255",
+            "eval" => "trim",
+          )
+        ),
+        "cas_port" => Array (
+          "exclude" => 1,
+          "label" => "LLL:EXT:ig_ldap_sso_auth/Resources/Private/Language/locallang_db.xlf:tx_igldapssoauth_config.cas_port",
+          "config" => Array (
+            "type" => "input",
+            "size" => "5",
+            "max" => "5",
+            "eval" => "int,trim",
+          )
+        ),
+        "cas_logout_url" => Array (
+          "exclude" => 1,
+          "label" => "LLL:EXT:ig_ldap_sso_auth/Resources/Private/Language/locallang_db.xlf:tx_igldapssoauth_config.cas_logout_url",
+          "config" => Array (
+            "type" => "input",
+            "size" => "30",
+            "max" => "255",
+            "eval" => "trim",
+          )
+        ),
         'group_membership' => [
             'label' => 'LLL:EXT:ig_ldap_sso_auth/Resources/Private/Language/locallang_db.xlf:tx_igldapssoauth_config.group_membership',
             'config' => [
@@ -200,6 +253,11 @@ return [
                         'LLL:EXT:ig_ldap_sso_auth/Resources/Private/Language/locallang_db.xlf:tx_igldapssoauth_config.group_membership.I.2',
                         \Causal\IgLdapSsoAuth\Library\Configuration::GROUP_MEMBERSHIP_FROM_MEMBER,
                         'EXT:ig_ldap_sso_auth/Resources/Public/Icons/selicon_group_membership_2.png'
+                    ],
+                    [
+                        'LLL:EXT:ig_ldap_sso_auth/Resources/Private/Language/locallang_db.xlf:tx_igldapssoauth_config.group_membership.I.3',
+                        \Causal\IgLdapSsoAuth\Library\Configuration::GROUP_MEMBERSHIP_MATCHING_LDAP,
+                        'EXT:ig_ldap_sso_auth/Resources/Public/Icons/selicon_group_membership_3.png'
                     ],
                 ],
                 'minitems' => 1,

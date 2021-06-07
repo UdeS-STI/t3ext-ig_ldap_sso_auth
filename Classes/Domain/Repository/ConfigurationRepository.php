@@ -174,6 +174,11 @@ class ConfigurationRepository
             'fe_groups_basedn' => 'frontendGroupsBaseDn',
             'fe_groups_filter' => 'frontendGroupsFilter',
             'fe_groups_mapping' => 'frontendGroupsMapping',
+            'cas_host' => 'CASHost',
+            'cas_port' => 'CASPort',
+            'cas_logout_url' => 'CASLogoutUrl',
+            'cas_service_url' => 'CASServiceUrl',
+            'cas_uri' => 'CASUri'
         ];
 
         foreach ($mapping as $fieldName => $propertyName) {
@@ -213,6 +218,12 @@ class ConfigurationRepository
         $object->_setProperty('ldapTlsReqcert', (bool)$row['ldap_tls_reqcert']);
         $object->_setProperty('ldapSsl', (bool)$row['ldap_ssl']);
         $object->_setProperty('groupMembership', (int)$row['group_membership']);
+
+        $object->_setProperty( 'CASHost', $row['cas_host']);
+        $object->_setProperty( 'CASPort',  (int) $row['cas_port']);
+        $object->_setProperty( 'CASLogoutUrl', $row['cas_logout_url']);
+        $object->_setProperty( 'CASServiceUrl', $row['cas_service_url']);
+        $object->_setProperty( 'CASUri', $row['cas_uri']);
     }
 
     /**
