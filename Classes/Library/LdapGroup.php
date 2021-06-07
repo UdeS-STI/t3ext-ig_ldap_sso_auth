@@ -122,6 +122,15 @@ class LdapGroup
         return false;
     }
 
+    /**
+     * Check if a user is member of an ldap group
+     *
+     * @param $userDn
+     * @param $groupDN
+     * @return bool
+     * @throws \Causal\IgLdapSsoAuth\Exception\UnresolvedPhpDependencyException
+     * @throws \TYPO3\CMS\Extbase\Object\Exception
+     */
     public static function isMemberOfLDAPGroup( $userDn, $groupDN )
     {
         $ldapInstance = Ldap::getInstance();
