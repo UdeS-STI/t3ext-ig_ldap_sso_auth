@@ -1,6 +1,21 @@
-<div class="authLink authLogin"><a href="{url}"><span class="authText">{authText}</span></a></div>
 <f:if condition="{user}">
-  <p>{user.name}</p>
+  <f:then>
+    <div class="authHeaderBloc">
+      <i class="icon-user withBackground"></i>
+      <span class="authFullnameCut">{user.name}</span>
+    </div>
+    <div class="authSubmenu">
+      <span class="authFullname">{user.name}</span>
+      <div class="authLink authLogin">
+        <a href="{url}"><span class="authText">{authText}</span></a>
+      </div>
+    </div>
+  </f:then>
+  <f:else>
+    <div class="authHeaderBloc">
+      <i class="icon-user"></i>
+      <div class="authLink authLogin"><a href="{url}"><span class="authText">{authText}</span></a></div>
+    </div>
+  </f:else>
 </f:if>
-
 
