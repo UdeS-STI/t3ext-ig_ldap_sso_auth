@@ -16,6 +16,7 @@ namespace Causal\IgLdapSsoAuth\Library;
 
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
+use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -55,14 +56,7 @@ class Configuration
      */
     public static function initialize($mode, \Causal\IgLdapSsoAuth\Domain\Model\Configuration $configuration)
     {
-        $typo3Branch = class_exists(\TYPO3\CMS\Core\Information\Typo3Version::class)
-            ? (new \TYPO3\CMS\Core\Information\Typo3Version())->getBranch()
-            : TYPO3_branch;
-        if (version_compare($typo3Branch, '9.0', '<')) {
-            $globalConfiguration = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['ig_ldap_sso_auth'] ?? '') ?? [];
-        } else {
-            $globalConfiguration = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['ig_ldap_sso_auth'] ?? [];
-        }
+        $globalConfiguration = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['ig_ldap_sso_auth'] ?? [];
 
         // Legacy configuration options
         unset($globalConfiguration['evaluateGroupsFromMembership']);
@@ -95,33 +89,26 @@ class Configuration
             }
         }
 
-        $typo3Branch = class_exists(\TYPO3\CMS\Core\Information\Typo3Version::class)
-            ? (new \TYPO3\CMS\Core\Information\Typo3Version())->getBranch()
-            : TYPO3_branch;
-        if (version_compare($typo3Branch, '9.0', '>=')) {
-            if (!empty(static::$domains)) {
-                trigger_error(
-                    'LDAP configuration record uid=' . $configuration->getUid() . ' uses associated domains which are deprecated since TYPO3 v9.',
-                    E_USER_DEPRECATED
-                );
-            }
-
-            $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
-            $siteIdentifiers = GeneralUtility::trimExplode(',', $configuration->getSites(), true);
-            foreach ($siteIdentifiers as $siteIdentifier) {
-                try {
-                    $host = $siteFinder->getSiteByIdentifier($siteIdentifier)->getBase()->getHost();
-                    if (empty($host)) {
-                        $host = GeneralUtility::getIndpEnv('TYPO3_HOST_ONLY');
-                    }
-                    static::$domains[] = $host;
-                } catch (SiteNotFoundException $e) {
-                    // Ignore invalid site identifiers.
-                }
-            }
-
-            static::$domains = array_unique(static::$domains);
+        if (!empty(static::$domains)) {
+            trigger_error(
+                'LDAP configuration record uid=' . $configuration->getUid() . ' uses associated domains which are deprecated since TYPO3 v9.',
+                E_USER_DEPRECATED
+            );
         }
+
+        $siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
+        $siteIdentifiers = GeneralUtility::trimExplode(',', $configuration->getSites(), true);
+        foreach ($siteIdentifiers as $siteIdentifier) {
+            try {
+                $site = $siteFinder->getSiteByIdentifier($siteIdentifier);
+                $domains = self::extractHostsFromSite($site);
+                static::$domains = array_merge(static::$domains, $domains);
+            } catch (SiteNotFoundException $e) {
+                // Ignore invalid site identifiers.
+            }
+        }
+
+        static::$domains = array_unique(static::$domains);
 
         static::$be['LDAPAuthentication'] = (bool)$globalConfiguration['enableBELDAPAuthentication'];
         static::$be['SSOAuthentication'] = (bool)$globalConfiguration['enableBESSO'];
@@ -423,6 +410,10 @@ class Configuration
      */
     public static function hasExtendedMapping($mapping = [])
     {
+        if (!is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['ig_ldap_sso_auth'] ?? null)) {
+            return false;
+        }
+
         // Shortcut: if hooks are registered, take for granted extended syntax will be used
         $extended = is_array($mapping)
             && (
@@ -501,6 +492,33 @@ class Configuration
             ->fetch();
 
         return !empty($config) ? $config : [];
+    }
+
+    /**
+     * Extract relevant hosts from a given site configuration.
+     * Respects base host and hosts for alternative site languages.
+     *
+     * @param Site $site
+     * @return string[]
+     */
+    protected static function extractHostsFromSite(Site $site): array
+    {
+        $hosts = [];
+
+        if ($site->getBase()->getHost() !== '') {
+            $hosts[] = $site->getBase()->getHost();
+        } else {
+            $hosts[] = GeneralUtility::getIndpEnv('TYPO3_HOST_ONLY');
+        }
+
+        // Allow domains from alternative languages.
+        foreach ($site->getLanguages() as $siteLanguage) {
+            if ($siteLanguage->getBase()->getHost() !== '') {
+                $hosts[] = $siteLanguage->getBase()->getHost();
+            }
+        }
+
+        return $hosts;
     }
 
 }
