@@ -32,29 +32,27 @@ class FeloginController extends ActionController {
             exit;
         }
         Configuration::initialize( TYPO3_MODE, $configuration );
-
-        if( Configuration::getValue('CASAuthentication')){
-
+        $casAuthentification = Configuration::getValue('CASAuthentication');
+        error_log( print_r( $casAuthentification,1 ));
+        if( $casAuthentification ){
             $getEnvName = '_ARRAY';
             $EnvVar = GeneralUtility::getIndpEnv( $getEnvName );
             $params = GeneralUtility::_GET();
 
             // Remove the ticket from URL if present
-            if( !empty($_REQUEST['ticket']) || !empty($_REQUEST['logintype'])){
-                #$url = GeneralUtility::locationHeaderUrl($this->uriBuilder->getRequest()->getRequestUri() . "&" . $params );
-                $url = $EnvVar['TYPO3_REQUEST_URL'];
-                $tempUrl = parse_url($url);
-                parse_str($tempUrl['query'], $items);
-                if (isset($items['logintype'])) {
-                    unset($items['logintype']);
-                }
-                if (isset($items['ticket'])) {
-                    unset($items['ticket']);
-                }
-                $tempUrl['query']= http_build_query($items);
-                $url=$tempUrl['scheme'].'://'.$tempUrl['host'].$tempUrl['path'].(!empty($tempUrl['query']) ? '?'.$tempUrl['query'] : '');
-                header("Location: ".$url);
-                exit;
+            if( ( !empty($_REQUEST['ticket']) || !empty($_REQUEST['logintype']) ) ){
+              $url = $EnvVar['TYPO3_REQUEST_URL'];
+              $tempUrl = parse_url($url);
+              parse_str($tempUrl['query'], $items);
+              if (isset($items['logintype'])) {
+                unset($items['logintype']);
+              }
+              if (isset($items['ticket'])) {
+                unset($items['ticket']);
+              }
+              $tempUrl['query'] = http_build_query($items);
+              $url = $tempUrl['scheme'] . '://' . $tempUrl['host'] . $tempUrl['path'] . (!empty($tempUrl['query']) ? '?' . $tempUrl['query'] : '');
+              header("Location: " . $url);
             }
 
             $authText = "";
@@ -74,7 +72,7 @@ class FeloginController extends ActionController {
             }
 
             if ( $this->userAspect->isLoggedIn()) {
-                $userData = $this->userService->getFeUserData();
+              $userData = $this->userService->getFeUserData();
             } else {
               $userData = null;
             }

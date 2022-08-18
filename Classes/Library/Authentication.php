@@ -172,7 +172,7 @@ class Authentication
       $urlWithoutParam = GeneralUtility::getIndpEnv( 'TYPO3_REQUEST_URL' );
       $temps = explode('?',$urlWithoutParam);
       $urlWithoutParam = $temps[0];
-      if( $params['ticket']||isset($loginInfo['status'])){
+      if( ( $params['ticket'] ?? false ) ||isset($loginInfo['status'])){
         // controle authentification by cas
         phpCAS::client(CAS_VERSION_2_0, (string)$casConfiguration['host'], (integer)$casConfiguration['port'], '');
         phpCAS::setCasServerCACert( '/usr/local/share/ca-certificates/udes-ca.crt' );
