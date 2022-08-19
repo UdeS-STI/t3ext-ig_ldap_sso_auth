@@ -51,6 +51,7 @@ class FeloginController extends ActionController {
               $tempUrl['query'] = http_build_query($items);
               $url = $tempUrl['scheme'] . '://' . $tempUrl['host'] . $tempUrl['path'] . (!empty($tempUrl['query']) ? '?' . $tempUrl['query'] : '');
               header("Location: " . $url);
+              return 0;
             }
 
             $authText = "";
