@@ -33,11 +33,9 @@ class FeloginController extends ActionController {
         }
         Configuration::initialize( TYPO3_MODE, $configuration );
         $casAuthentification = Configuration::getValue('CASAuthentication');
-        error_log( print_r( $casAuthentification,1 ));
         if( $casAuthentification ){
             $getEnvName = '_ARRAY';
             $EnvVar = GeneralUtility::getIndpEnv( $getEnvName );
-            $params = GeneralUtility::_GET();
 
             // Remove the ticket from URL if present
             if( ( !empty($_REQUEST['ticket']) || !empty($_REQUEST['logintype']) ) ){
