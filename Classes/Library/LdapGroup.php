@@ -38,7 +38,7 @@ class LdapGroup
      * @param \Causal\IgLdapSsoAuth\Library\Ldap $ldapInstance
      * @return array
      */
-    public static function selectFromMembership(array $membership = [], $baseDn, $filter, array $attributes = [], $extendedCheck = true, \Causal\IgLdapSsoAuth\Library\Ldap $ldapInstance = null)
+    public static function selectFromMembership(array $membership, $baseDn, $filter, array $attributes = [], $extendedCheck = true, \Causal\IgLdapSsoAuth\Library\Ldap $ldapInstance = null)
     {
         $ldapGroups['count'] = 0;
 
