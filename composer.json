@@ -27,7 +27,10 @@
     "jasig/phpcas": "1.4.0",
     "ext-ldap": "*",
     "ext-json": "*",
-    "typo3/cms-core": "^9.5 || ^10 || ^11"
+    "typo3/cms-core": "^9.5 || ^10 || ^11",
+    "league/oauth2-client": "2.6.1",
+    "okta/jwt-verifier": "1.4.0",
+    "firebase/php-jwt": "v6.1.2"
   },
   "autoload": {
     "psr-4": {
