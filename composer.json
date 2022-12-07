@@ -30,7 +30,7 @@
     "typo3/cms-core": "^9.5 || ^10 || ^11",
     "league/oauth2-client": "2.6.1",
     "okta/jwt-verifier": "1.4.0",
-    "firebase/php-jwt": "v6.1.2"
+    "firebase/php-jwt": "v5.4.0"
   },
   "autoload": {
     "psr-4": {
