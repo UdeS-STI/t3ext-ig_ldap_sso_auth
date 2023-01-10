@@ -23,14 +23,14 @@
   ],
   "license": "GPL-2.0-or-later",
   "require": {
-    "php": ">=7.2.0 <=7.4.99 || >=8.0.0 <=8.1.99",
+    "php": ">= 7.2.0, <= 7.4.99 || >=8.0.0 <=8.1.99",
     "jasig/phpcas": "1.4.0",
     "ext-ldap": "*",
     "ext-json": "*",
     "typo3/cms-core": "^9.5 || ^10 || ^11",
     "league/oauth2-client": "2.6.1",
     "okta/jwt-verifier": "1.4.0",
-    "firebase/php-jwt": "v5.4.0"
+    "firebase/php-jwt": "v6.1.2"
   },
   "autoload": {
     "psr-4": {

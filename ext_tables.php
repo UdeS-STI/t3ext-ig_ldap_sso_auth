@@ -71,6 +71,12 @@ defined('TYPO3_MODE') || die();
       'LLL:EXT:ig_ldap_sso_auth/Resources/Private/Language/locallang_db.xlf:tx_igldapssoauth_pi1.title'
     );
 
+  \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerPlugin(
+    'Causal.' . $_EXTKEY,
+    'Connexion',
+    'Universite de Sherbrooke - Connexion'
+  );
+
 })('ig_ldap_sso_auth');
 
 

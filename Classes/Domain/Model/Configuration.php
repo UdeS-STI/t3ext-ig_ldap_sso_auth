@@ -185,6 +185,36 @@ class Configuration
      */
     protected $frontendGroupsAssigned;
 
+   /**
+   * @var string
+   */
+    protected $frontendADFSLoginUrl;
+
+    /**
+     * @var string
+     */
+    protected $frontendADFSLogoutUrl;
+
+    /**
+     * @var string
+     */
+    protected $frontendADFSIssuer;
+
+    /**
+     * @var string
+     */
+    protected $frontendADFSClientId;
+
+    /**
+     * @var string
+     */
+    protected $frontendADFSClientSecret;
+
+    /**
+     * @var string
+     */
+    protected $frontendADFSRedirectUri;
+
     /**
      * @var string
      */
@@ -507,6 +537,48 @@ class Configuration
     public function getFrontendGroupsAssigned()
     {
         return $this->frontendGroupsAssigned;
+    }
+
+  /**
+   * @return string
+   */
+    public function getFrontendADFSLoginUrl():string {
+        return trim($this->frontendADFSLoginUrl);
+    }
+
+  /**
+   * @return string
+   */
+    public function getFrontendADFSLogoutUrl():string {
+        return trim($this->frontendADFSLogoutUrl);
+    }
+
+  /**
+   * @return string
+   */
+    public function getFrontendADFSIssuer():string {
+        return trim($this->frontendADFSIssuer);
+    }
+
+  /**
+   * @return string
+   */
+    public function getFrontendADFSClientId():string {
+        return trim($this->frontendADFSClientId);
+    }
+
+  /**
+   * @return string
+   */
+    public function getFrontendADFSClientSecret():string {
+        return trim($this->frontendADFSClientSecret);
+    }
+
+  /**
+   * @return string
+   */
+    public function getFrontendADFSRedirectUri():string {
+        return trim($this->frontendADFSRedirectUri);
     }
 
     /**

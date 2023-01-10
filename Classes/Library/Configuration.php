@@ -56,7 +56,7 @@ class Configuration
      * @param string $mode TYPO3 mode, either 'be' or 'fe'
      * @param \Causal\IgLdapSsoAuth\Domain\Model\Configuration $configuration
      */
-    public static function initialize($mode, \Causal\IgLdapSsoAuth\Domain\Model\Configuration $configuration)
+    public static function initialize($mode,  \Causal\IgLdapSsoAuth\Domain\Model\Configuration $configuration)
     {
         $globalConfiguration = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['ig_ldap_sso_auth'] ?? [];
 
@@ -116,6 +116,7 @@ class Configuration
         static::$be['SSOAuthentication'] = (bool)$globalConfiguration['enableBESSO'];
         static::$be['SSOKeepDomainName'] = (bool)$globalConfiguration['keepBESSODomainName'];
         static::$be['CASAuthentication'] = false;
+        static::$be['ADFSAuthentification'] = false;
         static::$be['forceLowerCaseUsername'] = $globalConfiguration['forceLowerCaseUsername'] ? (bool)$globalConfiguration['forceLowerCaseUsername'] : false;
         static::$be['evaluateGroupsFromMembership'] = $configuration->getGroupMembership() === static::GROUP_MEMBERSHIP_FROM_MEMBER;
         static::$be['evaluateGroupsFromLdapMembership'] = $configuration->getGroupMembership() === static::GROUP_MEMBERSHIP_MATCHING_LDAP;
@@ -139,6 +140,20 @@ class Configuration
         static::$fe['LDAPAuthentication'] = (bool)$globalConfiguration['enableFELDAPAuthentication'];
         static::$fe['SSOAuthentication'] = (bool)$globalConfiguration['enableFESSO'];
         static::$fe['CASAuthentication'] = (bool)$globalConfiguration['enableFECASAuthentication'];
+        static::$fe['ADFSAuthentication'] = (bool)$globalConfiguration['enableFEADFSAuthentication'];
+//        static::$fe['ADFSLoginUrl'] = $configuration->getFrontendADFSLoginUrl();
+//        static::$fe['ADFSLogoutUrl'] = $configuration->getFrontendADFSLogoutUrl();
+//        static::$fe['ADFSIssuer'] = $configuration->getFrontendADFSIssuer();
+//        static::$fe['ADFSClientId'] = $configuration->getFrontendADFSClientId();
+//        static::$fe['ADFSClientSecret'] = $configuration->getFrontendADFSClientSecret();
+//        static::$fe['ADFSRedirectUri'] = $configuration->getFrontendADFSRedirectUri();
+        static::$fe['ADFSLoginUrl'] = (string)$globalConfiguration['ADFSLoginUrl'];
+        static::$fe['ADFSLogoutUrl'] = (string)$globalConfiguration['ADFSLogoutUrl'];
+        static::$fe['ADFSIssuer'] = (string)$globalConfiguration['ADFSIssuer'];
+        static::$fe['ADFSClientId'] = (string)$globalConfiguration['ADFSClientId'];
+        static::$fe['ADFSClientSecret'] = (string)$globalConfiguration['ADFSClientSecret'];
+        static::$fe['ADFSRedirectUri'] = (string)$globalConfiguration['ADFSRedirectUri'];
+
         static::$fe['SSOKeepDomainName'] = (bool)$globalConfiguration['keepFESSODomainName'];
         static::$fe['forceLowerCaseUsername'] = $globalConfiguration['forceLowerCaseUsername'] ? (bool)$globalConfiguration['forceLowerCaseUsername'] : false;
         static::$fe['evaluateGroupsFromMembership'] = $configuration->getGroupMembership() === static::GROUP_MEMBERSHIP_FROM_MEMBER;
@@ -249,6 +264,8 @@ class Configuration
 
         return $groupMapping;
     }
+
+
 
     /**
      * Parses a mapping definition.

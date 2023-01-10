@@ -37,7 +37,7 @@ using a code like:
 .. code-block:: php
 
 	$GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['ig_ldap_sso_auth']['extraDataProcessing'][]
-		= \VendorName\Extension\YourClass::class;
+		= 'EXT:extension/Path/To/Class/ClassName.php:VendorName\\ClassName';
 
 Your class has to implement the
 :code:`\Causal\IgLdapSsoAuth\Utility\ExtraDataProcessorInterface` interface.

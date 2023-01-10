@@ -91,8 +91,23 @@ defined('TYPO3_MODE') || die();
     \TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
       'Causal.' . $_EXTKEY,
       'Pi1',
-      array('Felogin' => 'index'),
-      array('Felogin' => 'index')
+      [
+        \Causal\IgLdapSsoAuth\Controller\FeloginController::class => 'index'
+      ],
+      [
+        \Causal\IgLdapSsoAuth\Controller\FeloginController::class => 'index'
+      ]
+    );
+
+    \TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
+      'Causal.' . $_EXTKEY,
+      'Connexion',
+      [
+        \Causal\IgLdapSsoAuth\Controller\FeloginController::class => 'connexion',
+      ],
+      [
+        \Causal\IgLdapSsoAuth\Controller\FeloginController::class => 'connexion',
+      ]
     );
 })('ig_ldap_sso_auth');
 

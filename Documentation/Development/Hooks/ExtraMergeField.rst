@@ -36,7 +36,7 @@ using a code like:
 .. code-block:: php
 
 	$GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['ig_ldap_sso_auth']['extraMergeField']['myCustomHook']
-		= \VendorName\Extension\YourClass::class;
+		= 'EXT:extension/Path/To/Class/ClassName.php:VendorName\\ClassName';
 
 where ``myCustomHook`` corresponds to one of the ``hookName`` parameters you use
 in your mapping.

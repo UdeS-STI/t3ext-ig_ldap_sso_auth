@@ -15,12 +15,18 @@
 namespace Causal\IgLdapSsoAuth\Library;
 
 use Causal\IgLdapSsoAuth\Domain\Repository\ConfigurationRepository;
+use Causal\IgLdapSsoAuth\Utility\ADFSUtility;
 use phpCAS;
-use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use Causal\IgLdapSsoAuth\Library\LdapGroup;
 use Causal\IgLdapSsoAuth\Domain\Repository\Typo3GroupRepository;
 use Causal\IgLdapSsoAuth\Domain\Repository\Typo3UserRepository;
+use Causal\IgLdapSsoAuth\Library\LdapGroup;
+use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Domain\Repository\PageRepository;
+use TYPO3\CMS\Core\Exception\SiteNotFoundException;
+use TYPO3\CMS\Core\Information\Typo3Version;
+use TYPO3\CMS\Core\Routing\PageArguments;
+use TYPO3\CMS\Core\TypoScript\TemplateService;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
@@ -90,6 +96,7 @@ class Authentication
      */
     public static function ldapAuthenticate($username, $password = null, $domain = null)
     {
+error_log(print_r([$username,$password,$domain],1));
         static::$lastAuthenticationDiagnostic = '';
 
         if ($username && Configuration::getValue('forceLowerCaseUsername')) {
@@ -164,10 +171,8 @@ class Authentication
       //the cookie timeout is set to 0 so unlimited because it's not the cookie's job to set the timeout
       $timeOutCookie = 0 ;
       $params = GeneralUtility::_GET();
-      $urlWithoutParam = GeneralUtility::getIndpEnv( 'TYPO3_REQUEST_URL' );
-      $temps = explode('?',$urlWithoutParam);
-      $urlWithoutParam = $temps[0];
-      if( $params['ticket']||isset($loginInfo['status'])){
+
+      if( ( isset($params['ticket']) && $params['ticket'] ) || isset($loginInfo['status'])){
         // controle authentification by cas
         phpCAS::client(CAS_VERSION_2_0, (string)$casConfiguration['host'], (integer)$casConfiguration['port'], '');
         phpCAS::setCasServerCACert( '/usr/local/share/ca-certificates/udes-ca.crt' );
@@ -194,6 +199,100 @@ class Authentication
       } else {
         return false;
       }
+    }
+
+    public static function adfsAuthenticate( $loginInfo, $username ) {
+      if( isset($loginInfo['status']) ) {
+        $auth = ADFSUtility::Instance();
+        if($loginInfo['status'] == 'login' && !$auth->isAuthenticated()) {
+          $auth->forceAuth();
+        }
+        if( $auth->isAuthenticated() ) {
+          if ($username && Configuration::getValue('forceLowerCaseUsername')) {
+            $username = strtolower($username);
+          }
+          $adfsUsername = $auth->getUsername();
+          if( $adfsUsername != $username ) {
+            $typo3_user = self::ldapAuthenticate( $adfsUsername );
+            if ($typo3_user) {
+              return $typo3_user;
+            } else {
+              return false;
+            }
+          } else {
+            return true;
+          }
+        }
+      } else {
+        return false;
+      }
+//        error_log( print_r( $_REQUEST,1));
+//        if( isset( $_REQUEST["logintype"] ) ) {
+//            if( $_REQUEST["logintype"] == "login" ) {
+//                self::connexion();
+//            } else {
+//                self::deconnexion();
+//            }
+//        }
+        return ADFSUtility::Instance()->isAuthenticated();
+//        $params = GeneralUtility::_GET();
+//        if( isset( $params["logintype"]) ) {
+//            self::connexion();
+//        }
+//
+//        error_log( print_r( $params,1));
+//return ADFSUtility::Instance()->isAuthenticated();
+//        if( !ADFSUtility::Instance()->isAuthenticated() ) {
+//            return ADFSUtility::Instance()->forceAuth();
+//        }
+//        return true;
+    }
+
+    protected static function connexion() {
+        error_log( "Authentification connexion");
+error_log( print_r( $_GET,1));
+error_log( print_r( $_SESSION ?? "session not set",1));
+        // Check given state against previously stored one to mitigate CSRF attack
+        if (!empty($_GET['code']) && !empty($_GET['state']) &&
+            (isset($_SESSION['oauth2state']) && $_GET['state'] == $_SESSION['oauth2state'])) {
+error_log( "niveau 1");
+            if (ADFSUtility::Instance()->saveAccessTokenFromCode($_GET['code'])) {
+error_log( "niveau 2");
+                ADFSUtility::Instance()->redirectToRequestedUrl();
+            }
+        }
+
+        if( ADFSUtility::Instance()->isAuthenticated() ) {
+error_log( "authentifié");
+            $getEnvName = '_ARRAY';
+            $EnvVar = GeneralUtility::getIndpEnv( $getEnvName );
+            $url = $EnvVar['TYPO3_REQUEST_URL'];
+            error_log( $url);
+            $tempUrl = parse_url($url);
+            parse_str($tempUrl['query'], $items);
+            if (isset($items['logintype'])) {
+                unset($items['logintype']);
+            }
+            if (isset($items['ticket'])) {
+                unset($items['ticket']);
+            }
+            $tempUrl['query'] = http_build_query($items);
+            $url = $tempUrl['scheme'] . '://' . $tempUrl['host'] . $tempUrl['path'] . (!empty($tempUrl['query']) ? '?' . $tempUrl['query'] : '');
+            header("Location: " . $url);
+            return 0;
+        }
+        else {
+error_log( "pas authentifié");
+            ADFSUtility::Instance()->forceAuth();
+        }
+    }
+
+    protected static function deconnexion() {
+        if( ADFSUtility::instance()->isAuthenticated() ) {
+
+            // Affichage de la page par défaut
+            ADFSUtility::instance()->logout();
+        }
     }
 
     /**
