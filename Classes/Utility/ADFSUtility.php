@@ -3,8 +3,8 @@
 namespace Causal\IgLdapSsoAuth\Utility;
 
 use Causal\IgLdapSsoAuth\Library\Configuration;
-use Causal\IgLdapSsoAuth\Utility\JwtVerifier;
-use Causal\IgLdapSsoAuth\Utility\JwtVerifierBuilder;
+//use Causal\IgLdapSsoAuth\Utility\JwtVerifier;
+//use Causal\IgLdapSsoAuth\Utility\JwtVerifierBuilder;
 //use Okta\JwtVerifier\JwtVerifierBuilder;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\GenericProvider;
@@ -57,6 +57,26 @@ class ADFSUtility
         }
         return static::$instances[$name];
 
+    }
+
+    public function connexion() {
+      session_start();
+      error_log( "connexionAction");
+
+      // Check given state against previously stored one to mitigate CSRF attack
+      if (!empty($_GET['code']) && !empty($_GET['state']) &&
+        (isset($_SESSION['oauth2state']) && $_GET['state'] == $_SESSION['oauth2state'])) {
+        if (ADFSUtility::Instance()->saveAccessTokenFromCode($_GET['code'])) {
+          ADFSUtility::Instance()->redirectToRequestedUrl();
+        }
+      }
+      if( ADFSUtility::Instance()->isAuthenticated() ) {
+        error_log( "authentifié, redirection?");
+        //self::redirect("/");
+      } else {
+        error_log( "pas authentifié exit");
+        ADFSUtility::Instance()->forceAuth();
+      }
     }
 
     /**
@@ -303,7 +323,17 @@ class ADFSUtility
     {
       session_start();
         $this->invalidateSession();
-        $_SESSION['url_requested'] = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
+
+        // prepare url
+      $url = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
+      $tempUrl = parse_url($url);
+      parse_str($tempUrl['query'], $items);
+      if (isset($items['logintype'])) {
+        unset($items['logintype']);
+      }
+      $tempUrl['query'] = http_build_query($items);
+      $url = $tempUrl['path'] . (!empty($tempUrl['query']) ? '?' . $tempUrl['query'] : '');
+        $_SESSION['url_requested'] = $url;
 
         // Fetch the authorization URL from the provider; this returns the
         // urlAuthorize option and generates and applies any necessary parameters
@@ -332,7 +362,6 @@ class ADFSUtility
      */
     public function saveAccessTokenFromCode($code)
     {
-error_log("saveAccessTokenFromCode");
         // Try to get an access token using the authorization code grant.
         $token = $this->provider->getAccessToken('authorization_code', [
             'code' => $code,
@@ -526,6 +555,7 @@ error_log("saveAccessTokenFromCode");
     {
         if (isset($_SESSION['url_requested'])) {
             $urlRequested = $_SESSION['url_requested'];
+error_log( $urlRequested );
             header('Location: ' . $urlRequested);
             exit;
         }

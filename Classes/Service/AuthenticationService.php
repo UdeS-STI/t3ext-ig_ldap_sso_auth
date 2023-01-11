@@ -74,6 +74,7 @@ class AuthenticationService extends \TYPO3\CMS\Core\Authentication\Authenticatio
      */
     public function getUser()
     {
+error_log( "getUser");
         $user = false;
         $userRecordOrIsValid = false;
         $remoteUser = $this->getRemoteUser();
@@ -87,7 +88,7 @@ class AuthenticationService extends \TYPO3\CMS\Core\Authentication\Authenticatio
         // the authentication stack to always fetch the user:
         // $TYPO3_CONF_VARS['SVCONF']['auth']['setup']['BE_alwaysFetchUser'] = true;
         // This is the case, e.g., when using EXT:crawler.
-        if ($this->login['status'] !== 'login' && !($enableFrontendSso || $enableBackendSso || $enableFrontendCAS)) {
+        if ($this->login['status'] !== 'login' && !($enableFrontendSso || $enableBackendSso || $enableFrontendCAS || $enableFrontendADFS)) {
             return $user;
         }
 
@@ -123,7 +124,6 @@ class AuthenticationService extends \TYPO3\CMS\Core\Authentication\Authenticatio
             } elseif( $enableFrontendADFS ){
                 // ADFS authentication
                 $userRecordOrIsValid = Authentication::adfsAuthenticate($this->login, $remoteUser);
-error_log( "adfsAuthenticate return: " . $userRecordOrIsValid );
             } elseif ($enableFrontendSso || $enableBackendSso) {
                 // Strip the domain name
                 $domain = null;

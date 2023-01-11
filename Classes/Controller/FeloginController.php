@@ -25,14 +25,15 @@ class FeloginController extends ActionController {
     }
 
     public function indexAction() {
+error_log( "indexAction");
         if( !empty($_REQUEST['logintype']) ) {
             if( $_REQUEST['logintype'] == "login" ) {
-              $this->connexion();
+              $this->connexionAction();
             } elseif( $_REQUEST['logintype'] == "logout" ) {
               $this->deconnexion();
             }
         }
-
+error_log( "authentifié:" . ADFSUtility::Instance()->isAuthenticated());
         //$url = Configuration::getValue('ADFSLoginUrl');
       $getEnvName = '_ARRAY';
       $EnvVar = GeneralUtility::getIndpEnv( $getEnvName );
@@ -63,25 +64,7 @@ class FeloginController extends ActionController {
     }
 
     public function connexionAction(): ResponseInterface {
-session_start();
-
-      // Check given state against previously stored one to mitigate CSRF attack
-      if (!empty($_GET['code']) && !empty($_GET['state']) &&
-        (isset($_SESSION['oauth2state']) && $_GET['state'] == $_SESSION['oauth2state'])) {
-        if (ADFSUtility::Instance()->saveAccessTokenFromCode($_GET['code'])) {
-          ADFSUtility::Instance()->redirectToRequestedUrl();
-        }
-      }
-      if( ADFSUtility::Instance()->isAuthenticated() ) {
-        error_log( "authentifié, redirection?");
-        //self::redirect("/");
-      } else {
-        error_log( "pas authentifié exit");
-exit;
-        ADFSUtility::Instance()->forceAuth();
-      }
-
-
+      ADFSUtility::Instance()->connexion();
       return $this->htmlResponse();
     }
 

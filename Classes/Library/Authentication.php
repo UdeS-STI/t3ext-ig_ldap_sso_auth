@@ -202,30 +202,37 @@ error_log(print_r([$username,$password,$domain],1));
     }
 
     public static function adfsAuthenticate( $loginInfo, $username ) {
-      if( isset($loginInfo['status']) ) {
-        $auth = ADFSUtility::Instance();
-        if($loginInfo['status'] == 'login' && !$auth->isAuthenticated()) {
-          $auth->forceAuth();
-        }
-        if( $auth->isAuthenticated() ) {
-          if ($username && Configuration::getValue('forceLowerCaseUsername')) {
-            $username = strtolower($username);
-          }
-          $adfsUsername = $auth->getUsername();
-          if( $adfsUsername != $username ) {
-            $typo3_user = self::ldapAuthenticate( $adfsUsername );
-            if ($typo3_user) {
-              return $typo3_user;
-            } else {
-              return false;
-            }
-          } else {
-            return true;
-          }
-        }
-      } else {
-        return false;
-      }
+error_log( "adfsAuthenticate");
+      $params = GeneralUtility::_GET();
+
+//      ADFSUtility::Instance()->connexion();
+//error_log( $username);
+//      if( !isset($loginInfo['status']) ) {
+//        return false;
+//      }
+//      $auth = ADFSUtility::Instance();
+//      if($loginInfo['status'] == 'login' && !$auth->isAuthenticated()) {
+//error_log( "CALL forceAuth");
+//        $username = $auth->forceAuth();
+//error_log( $username );
+//      }
+//      if( $auth->isAuthenticated() ) {
+//  error_log( "is authenticated");
+//        if ($username && Configuration::getValue('forceLowerCaseUsername')) {
+//          $username = strtolower($username);
+//        }
+//        $adfsUsername = $auth->getUsername();
+//        if( $adfsUsername != $username ) {
+//          $typo3_user = self::ldapAuthenticate( $adfsUsername );
+//          if ($typo3_user) {
+//            return $typo3_user;
+//          } else {
+//            return false;
+//          }
+//        } else {
+//          return true;
+//        }
+//      }
 //        error_log( print_r( $_REQUEST,1));
 //        if( isset( $_REQUEST["logintype"] ) ) {
 //            if( $_REQUEST["logintype"] == "login" ) {
@@ -234,14 +241,14 @@ error_log(print_r([$username,$password,$domain],1));
 //                self::deconnexion();
 //            }
 //        }
-        return ADFSUtility::Instance()->isAuthenticated();
+////        return ADFSUtility::Instance()->isAuthenticated();
 //        $params = GeneralUtility::_GET();
 //        if( isset( $params["logintype"]) ) {
 //            self::connexion();
 //        }
 //
 //        error_log( print_r( $params,1));
-//return ADFSUtility::Instance()->isAuthenticated();
+////return ADFSUtility::Instance()->isAuthenticated();
 //        if( !ADFSUtility::Instance()->isAuthenticated() ) {
 //            return ADFSUtility::Instance()->forceAuth();
 //        }
@@ -250,6 +257,7 @@ error_log(print_r([$username,$password,$domain],1));
 
     protected static function connexion() {
         error_log( "Authentification connexion");
+session_start();
 error_log( print_r( $_GET,1));
 error_log( print_r( $_SESSION ?? "session not set",1));
         // Check given state against previously stored one to mitigate CSRF attack
