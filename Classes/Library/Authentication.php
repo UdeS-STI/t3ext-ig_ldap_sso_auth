@@ -15,6 +15,7 @@
 namespace Causal\IgLdapSsoAuth\Library;
 
 use Causal\IgLdapSsoAuth\Domain\Repository\ConfigurationRepository;
+use Causal\IgLdapSsoAuth\Utility\ADFSUtility;
 use phpCAS;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -24,6 +25,7 @@ use Causal\IgLdapSsoAuth\Domain\Repository\Typo3UserRepository;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
+use TYPO3\CMS\Install\Service\SessionService;
 
 /**
  * Class Authentication for the 'ig_ldap_sso_auth' extension.
@@ -159,7 +161,6 @@ class Authentication
      *
      */
     public static function casAuthenticate( $loginInfo, $username ){
-
       $casConfiguration = Configuration::getCASConfiguration();
       //the cookie timeout is set to 0 so unlimited because it's not the cookie's job to set the timeout
       $timeOutCookie = 0 ;
@@ -194,6 +195,34 @@ class Authentication
       } else {
         return false;
       }
+    }
+
+    public static function adfsAuthenticate( $loginInfo, $username ){
+      $session = new SessionService();
+      $session->startSession();
+
+      // Vérifie si on a reçu le code d'ADFS et valide que le state retourné est le même que dans la session.
+      if (!empty($_GET['code'])
+        && !empty($_GET['state'])
+        && isset($_SESSION['oauth2state'])
+        && $_GET['state'] == $_SESSION['oauth2state']) {
+
+        if (ADFSUtility::Instance()->saveAccessTokenFromCode($_GET['code'])) {
+          $typo3_user = self::ldapAuthenticate( ADFSUtility::Instance()->getUsername() );
+          if ($typo3_user) {
+            return $typo3_user;
+          } else {
+            return false;
+          }
+        }
+      }
+
+      if(isset($loginInfo['status']) && $loginInfo['status'] === 'login') {
+        ADFSUtility::Instance()->forceAuth();
+        return true;
+      }
+
+      return false;
     }
 
     /**

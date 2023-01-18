@@ -116,6 +116,7 @@ class Configuration
         static::$be['SSOAuthentication'] = (bool)$globalConfiguration['enableBESSO'];
         static::$be['SSOKeepDomainName'] = (bool)$globalConfiguration['keepBESSODomainName'];
         static::$be['CASAuthentication'] = false;
+        static::$be['ADFSAuthentification'] = false;
         static::$be['forceLowerCaseUsername'] = $globalConfiguration['forceLowerCaseUsername'] ? (bool)$globalConfiguration['forceLowerCaseUsername'] : false;
         static::$be['evaluateGroupsFromMembership'] = $configuration->getGroupMembership() === static::GROUP_MEMBERSHIP_FROM_MEMBER;
         static::$be['evaluateGroupsFromLdapMembership'] = $configuration->getGroupMembership() === static::GROUP_MEMBERSHIP_MATCHING_LDAP;
@@ -139,6 +140,10 @@ class Configuration
         static::$fe['LDAPAuthentication'] = (bool)$globalConfiguration['enableFELDAPAuthentication'];
         static::$fe['SSOAuthentication'] = (bool)$globalConfiguration['enableFESSO'];
         static::$fe['CASAuthentication'] = (bool)$globalConfiguration['enableFECASAuthentication'];
+        static::$fe['ADFSAuthentication'] = (bool)$globalConfiguration['enableFEADFSAuthentication'];
+        static::$fe['ADFSIssuer'] = (string)$globalConfiguration['ADFSIssuer'];
+        static::$fe['ADFSClientId'] = (string)$globalConfiguration['ADFSClientId'];
+        static::$fe['ADFSClientSecret'] = (string)$globalConfiguration['ADFSClientSecret'];
         static::$fe['SSOKeepDomainName'] = (bool)$globalConfiguration['keepFESSODomainName'];
         static::$fe['forceLowerCaseUsername'] = $globalConfiguration['forceLowerCaseUsername'] ? (bool)$globalConfiguration['forceLowerCaseUsername'] : false;
         static::$fe['evaluateGroupsFromMembership'] = $configuration->getGroupMembership() === static::GROUP_MEMBERSHIP_FROM_MEMBER;
