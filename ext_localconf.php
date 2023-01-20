@@ -44,6 +44,11 @@ defined('TYPO3_MODE') || die();
       $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['logoff_post_processing'][$_EXTKEY] = 'Causal\IgLdapSsoAuth\Hooks\CasLogOffHook->postProcessing';
     }
 
+    if( $EXT_CONFIG['enableFEADFSAuthentication'] ){
+      //Adding a log off pre-processor hook
+      $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['logoff_post_processing'][$_EXTKEY] = 'Causal\IgLdapSsoAuth\Hooks\ADFSLogOffHook->postProcessing';
+    }
+
     // Register hook for \TYPO3\CMS\Core\DataHandling\DataHandler
     $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] = \Causal\IgLdapSsoAuth\Hooks\DataHandler::class;
 
@@ -91,8 +96,12 @@ defined('TYPO3_MODE') || die();
     \TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
       'Causal.' . $_EXTKEY,
       'Pi1',
-      array('Felogin' => 'index'),
-      array('Felogin' => 'index')
+      [
+        \Causal\IgLdapSsoAuth\Controller\FeloginController::class => 'index'
+      ],
+      [
+        \Causal\IgLdapSsoAuth\Controller\FeloginController::class => 'index'
+      ]
     );
 })('ig_ldap_sso_auth');
 

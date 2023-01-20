@@ -66,6 +66,21 @@
 			<trans-unit id="settings.enableFECASAuthentication">
           <source>Frontend CAS Authentication: Enable CAS Authentication for Frontend users.</source>
       </trans-unit>
+			<trans-unit id="settings.enableFEADFSAuthentication">
+          <source>Frontend ADFS Authentication: Enable ADFS Authentication for Frontend users.</source>
+      </trans-unit>
+			<trans-unit id="settings.ADFSIssuer">
+          <source>ADFS Issuer</source>
+      </trans-unit>
+      <trans-unit id="settings.ADFSClientId">
+          <source>ADFS client ID</source>
+      </trans-unit>
+			<trans-unit id="settings.ADFSClientSecret">
+          <source>ADFS client secret</source>
+      </trans-unit>
+			<trans-unit id="settings.ADFSRedirectUriPrefix">
+          <source>ADFS redirect URI prefix</source>
+      </trans-unit>
 			<trans-unit id="settings.keepFESSODomainName">
 				<source>Frontend SSO: Keep the domain name after a successful login (for example on a CAS-Server), to continue the chain of authentication through LDAP.</source>
 			</trans-unit>
