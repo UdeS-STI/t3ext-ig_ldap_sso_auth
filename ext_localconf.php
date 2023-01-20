@@ -44,7 +44,7 @@ defined('TYPO3_MODE') || die();
       $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['logoff_post_processing'][$_EXTKEY] = 'Causal\IgLdapSsoAuth\Hooks\CasLogOffHook->postProcessing';
     }
 
-    if( $EXT_CONFIG['enableFEADFSAuthentication'] ){
+    if( isset($EXT_CONFIG['enableFEADFSAuthentication']) && $EXT_CONFIG['enableFEADFSAuthentication'] ){
       //Adding a log off pre-processor hook
       $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_userauth.php']['logoff_post_processing'][$_EXTKEY] = 'Causal\IgLdapSsoAuth\Hooks\ADFSLogOffHook->postProcessing';
     }
