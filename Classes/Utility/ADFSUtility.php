@@ -230,15 +230,15 @@ class ADFSUtility
         $this->name = $name;
         $pluginConfig = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['ig_ldap_sso_auth'] ?? [];
 
-      $requestedUrlSegments = explode('/', $_SESSION['url_requested']);
-        $siteName = $requestedUrlSegments[1];
+      $requestedUrlSegments = explode('/', $_SERVER['REQUEST_URI']);
+      $siteName = $requestedUrlSegments[1];
 
       $this->config = [
         'issuer' => $pluginConfig["ADFSIssuer"],
         'clientId' => "service://" . $pluginConfig["ADFSClientId"],
         'ressourceId' => "service://" . $pluginConfig["ADFSClientId"],
         'clientSecret' => $pluginConfig["ADFSClientSecret"],
-        'redirectUri' => $pluginConfig['ADFSRedirectUriPrefix'] . $siteName, //$pluginConfig["ADFSRedirectUri"],
+        'redirectUri' => $pluginConfig['ADFSRedirectUriPrefix'] . '/' . $siteName,
         'scope' => array(
           "allatclaims", "profile", "email", "user_impersonation"
         ),
@@ -277,8 +277,9 @@ class ADFSUtility
     public function login()
     {
         $this->invalidateSession();
+        session_start();
 
-        $_SESSION['url_requested'] = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
+        $_SESSION['url_requested'] = $_SERVER['REQUEST_URI'] ?? '/';
 
         // Fetch the authorization URL from the provider; this returns the
         // urlAuthorize option and generates and applies any necessary parameters
@@ -418,7 +419,8 @@ class ADFSUtility
         }
 
         $this->setAccessToken(null, $onBehalfOf);
-
+        session_destroy();
+        setcookie(session_name(), '', time() - 4200);
     }
 
     /**

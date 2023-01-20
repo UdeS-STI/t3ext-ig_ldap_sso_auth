@@ -36,45 +36,48 @@ class FeloginController extends ActionController {
 
       Configuration::initialize(TYPO3_MODE, $configuration);
 
-      if (Configuration::getValue('ADFSAuthentication') || Configuration::getValue('CASAuthentication')) {
+      $adfsAuthEnabled = Configuration::getValue('ADFSAuthentication');
+      $casAuthEnabled = Configuration::getValue('CASAuthentication');
 
+      if ($adfsAuthEnabled || $casAuthEnabled) {
         $getEnvName = '_ARRAY';
         $EnvVar = GeneralUtility::getIndpEnv($getEnvName);
 
-        // Remove the ticket from URL if present
-        if ((Configuration::getValue('ADFSAuthentication')
-            && !empty($_REQUEST['code']) || !empty($_REQUEST['state']))
-            && ADFSUtility::Instance()->isAuthenticated()
-            && isset($_SESSION['url_requested'])) {
+        $hasAuthCodeOrState = !empty($_REQUEST['code']) || !empty($_REQUEST['state']);
+        $isAuthenticated = ADFSUtility::Instance()->isAuthenticated();
 
+        $shouldRedirectToUrlRequestedADFS = $adfsAuthEnabled
+          && $hasAuthCodeOrState
+          && $isAuthenticated
+          && isset($_SESSION['url_requested']);
+
+        $shouldRedirectToUrlRequestedCAS = !empty($_REQUEST['ticket']) || !empty($_REQUEST['logintype']);
+
+        // Remove the ticket from URL if present
+        if ($shouldRedirectToUrlRequestedADFS) {
           $tempUrl = parse_url($_SESSION['url_requested']);
           parse_str($tempUrl['query'], $items);
-          if (isset($items['logintype'])) {
-            unset($items['logintype']);
-          }
-          if (isset($items['code'])) {
-            unset($items['code']);
-          }
-          if (isset($items['state'])) {
-            unset($items['state']);
-          }
+
+          unset($items['logintype']);
+          unset($items['code']);
+          unset($items['state']);
+
           $tempUrl['query'] = http_build_query($items);
           $url = $tempUrl['path'] . (!empty($tempUrl['query']) ? '?' . $tempUrl['query'] : '');
           $_SESSION['url_requested'] = $url;
 
           ADFSUtility::Instance()->redirectToRequestedUrl();
-        } else if( !empty($_REQUEST['ticket']) || !empty($_REQUEST['logintype'])){
+        } else if($shouldRedirectToUrlRequestedCAS){
           $url = $EnvVar['TYPO3_REQUEST_URL'];
           $tempUrl = parse_url($url);
           parse_str($tempUrl['query'], $items);
-          if (isset($items['logintype'])) {
-            unset($items['logintype']);
-          }
-          if (isset($items['ticket'])) {
-            unset($items['ticket']);
-          }
+
+          unset($items['logintype']);
+          unset($items['ticket']);
+
           $tempUrl['query']= http_build_query($items);
-          $url=$tempUrl['scheme'].'://'.$tempUrl['host'].$tempUrl['path'].(!empty($tempUrl['query']) ? '?'.$tempUrl['query'] : '');
+          $queryParameters = !empty($tempUrl['query']) ? '?'.$tempUrl['query'] : '';
+          $url=$tempUrl['scheme'].'://'.$tempUrl['host'].$tempUrl['path'].$queryParameters;
           header("Location: ".$url);
           exit;
         }
