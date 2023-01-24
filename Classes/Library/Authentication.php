@@ -196,25 +196,39 @@ class Authentication
     }
 
     public static function adfsAuthenticate( $loginInfo, $username ){
+      session_name(ADFSUtility::getRequestedSiteName());
       session_start();
+
+      $needsToLdapAuthenticate = false;
+      $requestLogin = isset($loginInfo['status']) && $loginInfo['status'] === 'login';
+      $hasAuthenticationCode = !empty($_GET['code']);
 
       $statesAreMatching = isset($_SESSION['oauth2state']) && !empty($_GET['state'])
                           && $_GET['state'] == $_SESSION['oauth2state'];
-      $hasAuthenticationCode = !empty($_GET['code']);
+
 
       // Vérifie si on a reçu le code d'ADFS et valide que le state retourné est le même que dans la session.
       if ($hasAuthenticationCode && $statesAreMatching) {
         if (ADFSUtility::Instance()->saveAccessTokenFromCode($_GET['code'])) {
-          $typo3_user = self::ldapAuthenticate( ADFSUtility::Instance()->getUsername() );
-          if ($typo3_user) {
-            return $typo3_user;
-          } else {
-            return false;
-          }
+         $needsToLdapAuthenticate = true;
         }
       }
 
-      if(isset($loginInfo['status']) && $loginInfo['status'] === 'login') {
+      if($requestLogin && ADFSUtility::Instance()->isAuthenticated()) {
+        $needsToLdapAuthenticate = true;
+      }
+
+      if($needsToLdapAuthenticate) {
+        $typo3_user = self::ldapAuthenticate(ADFSUtility::Instance()->getUsername());
+
+        if ($typo3_user) {
+          return $typo3_user;
+        } else {
+          return false;
+        }
+      }
+
+      if($requestLogin) {
         ADFSUtility::Instance()->forceAuth();
         return true;
       }
