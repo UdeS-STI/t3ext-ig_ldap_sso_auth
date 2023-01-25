@@ -7,6 +7,7 @@ use League\OAuth2\Client\Provider\GenericProvider;
 use League\OAuth2\Client\Token\AccessToken;
 use Okta\JwtVerifier\Adaptors\FirebasePhpJwt;
 use Okta\JwtVerifier\Discovery\Oidc;
+use TYPO3\CMS\Core\Site\SiteFinder;
 
 /**
  * OAuth authentication
@@ -53,6 +54,11 @@ class ADFSUtility
         return static::$instances[$name];
 
     }
+
+  public static function getRequestedSiteName() {
+    $requestedUrlSegments = explode('/', $_SERVER['REQUEST_URI']);
+    return $requestedUrlSegments[1];
+  }
 
     /**
      * Get specific adfs config
@@ -230,14 +236,21 @@ class ADFSUtility
         $this->name = $name;
         $pluginConfig = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['ig_ldap_sso_auth'] ?? [];
 
-      $requestedUrlSegments = explode('/', $_SERVER['REQUEST_URI']);
-      $siteName = $requestedUrlSegments[1];
+        $siteName = self::getRequestedSiteName();
+        $siteFinder = new SiteFinder();
+        $siteNameWithoutTypo3Prefix = str_replace('typo3_', '', $siteName);
+        $site = $siteFinder->getSiteByIdentifier($siteNameWithoutTypo3Prefix);
+        $siteConfig = $site->getConfiguration();
+
+        $clientId = $siteConfig['adfs']['clientId'];
+        $clientSecret = $siteConfig['adfs']['clientSecret'];
+        $issuer = $pluginConfig["ADFSIssuer"];
 
       $this->config = [
-        'issuer' => $pluginConfig["ADFSIssuer"],
-        'clientId' => "service://" . $pluginConfig["ADFSClientId"],
-        'ressourceId' => "service://" . $pluginConfig["ADFSClientId"],
-        'clientSecret' => $pluginConfig["ADFSClientSecret"],
+        'issuer' => $issuer,
+        'clientId' => "service://$clientId",
+        'ressourceId' => "service://$clientId",
+        'clientSecret' => $clientSecret,
         'redirectUri' => $pluginConfig['ADFSRedirectUriPrefix'] . '/' . $siteName,
         'scope' => array(
           "allatclaims", "profile", "email", "user_impersonation"
@@ -277,6 +290,7 @@ class ADFSUtility
     public function login()
     {
         $this->invalidateSession();
+        session_name(ADFSUtility::getRequestedSiteName());
         session_start();
 
         $_SESSION['url_requested'] = $_SERVER['REQUEST_URI'] ?? '/';
@@ -398,7 +412,7 @@ class ADFSUtility
      */
     public function forceAuth()
     {
-        if (!$this->isAuthenticated()) {
+        if (!$this->isAuthenticated() || !$this->getUsername()) {
             $this->login();
         }
 
@@ -421,6 +435,7 @@ class ADFSUtility
         $this->setAccessToken(null, $onBehalfOf);
         session_destroy();
         setcookie(session_name(), '', time() - 4200);
+        setcookie('fe_typo_user', '', time() - 4200);
     }
 
     /**
@@ -503,7 +518,6 @@ class ADFSUtility
         if (isset($_SESSION['url_requested'])) {
             $urlRequested = $_SESSION['url_requested'];
             header('Location: ' . $urlRequested);
-//            exit;
         }
     }
 

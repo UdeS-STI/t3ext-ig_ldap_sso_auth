@@ -142,8 +142,6 @@ class Configuration
         static::$fe['CASAuthentication'] = (bool)$globalConfiguration['enableFECASAuthentication'];
         static::$fe['ADFSAuthentication'] = (bool)$globalConfiguration['enableFEADFSAuthentication'];
         static::$fe['ADFSIssuer'] = (string)$globalConfiguration['ADFSIssuer'];
-        static::$fe['ADFSClientId'] = (string)$globalConfiguration['ADFSClientId'];
-        static::$fe['ADFSClientSecret'] = (string)$globalConfiguration['ADFSClientSecret'];
         static::$fe['SSOKeepDomainName'] = (bool)$globalConfiguration['keepFESSODomainName'];
         static::$fe['forceLowerCaseUsername'] = $globalConfiguration['forceLowerCaseUsername'] ? (bool)$globalConfiguration['forceLowerCaseUsername'] : false;
         static::$fe['evaluateGroupsFromMembership'] = $configuration->getGroupMembership() === static::GROUP_MEMBERSHIP_FROM_MEMBER;

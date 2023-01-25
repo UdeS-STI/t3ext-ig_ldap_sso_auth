@@ -18,6 +18,7 @@ class ADFSLogOffHook {
      * @param \TYPO3\CMS\Core\Authentication\AbstractUserAuthentication $pObj
      */
     public function postProcessing($_params, $pObj) {
+        session_name(ADFSUtility::getRequestedSiteName());
         session_start();
 
         if( TYPO3_MODE == 'FE' ){
