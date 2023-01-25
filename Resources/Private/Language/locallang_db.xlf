@@ -72,12 +72,6 @@
 			<trans-unit id="settings.ADFSIssuer">
           <source>ADFS Issuer</source>
       </trans-unit>
-      <trans-unit id="settings.ADFSClientId">
-          <source>ADFS client ID</source>
-      </trans-unit>
-			<trans-unit id="settings.ADFSClientSecret">
-          <source>ADFS client secret</source>
-      </trans-unit>
 			<trans-unit id="settings.ADFSRedirectUriPrefix">
           <source>ADFS redirect URI prefix</source>
       </trans-unit>
