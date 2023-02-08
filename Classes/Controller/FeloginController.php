@@ -46,6 +46,13 @@ class FeloginController extends ActionController {
         $hasAuthCodeOrState = !empty($_REQUEST['code']) || !empty($_REQUEST['state']);
         $isAuthenticated = ADFSUtility::Instance()->isAuthenticated();
 
+        // Pour les sites multilingues, la session était perdue alors on doit la repartir si elle ne l'est pas déjà
+        // pour se faire redirigé à l'URL souhaité
+        if($hasAuthCodeOrState && session_status() !== PHP_SESSION_ACTIVE) {
+          session_name(ADFSUtility::getRequestedSiteName());
+          session_start();
+        }
+
         $shouldRedirectToUrlRequestedADFS = $adfsAuthEnabled
           && $hasAuthCodeOrState
           && $isAuthenticated
@@ -56,7 +63,7 @@ class FeloginController extends ActionController {
         // Remove the ticket from URL if present
         if ($shouldRedirectToUrlRequestedADFS) {
           $tempUrl = parse_url($_SESSION['url_requested']);
-          parse_str($tempUrl['query'], $items);
+          parse_str($tempUrl['query'] ?? '', $items);
 
           unset($items['logintype']);
           unset($items['code']);
