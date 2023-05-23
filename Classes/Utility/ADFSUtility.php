@@ -242,8 +242,8 @@ class ADFSUtility
         $site = $siteFinder->getSiteByIdentifier($siteNameWithoutTypo3Prefix);
         $siteConfig = $site->getConfiguration();
 
-        $clientId = $siteConfig['adfs']['clientId'];
-        $clientSecret = $siteConfig['adfs']['clientSecret'];
+        $clientId = $siteConfig['adfs']['clientId'] ?? '';
+        $clientSecret = $siteConfig['adfs']['clientSecret'] ?? '';
         $issuer = $pluginConfig["ADFSIssuer"];
 
       $this->config = [

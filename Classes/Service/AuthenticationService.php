@@ -195,7 +195,13 @@ class AuthenticationService extends \TYPO3\CMS\Core\Authentication\Authenticatio
                     'diagnostic' => $diagnostic,
                     'configUid' => $configurationRecord->getUid(),
                 ];
-                static::getLogger()->error('Authentication failed', $info);
+
+                // Ajout d'une condition pour limiter les logs. Sinon il y a plusieurs logs qui ne sont pas réellement
+                // des tentatives de connexions échouées.
+                if($this->login['status'] === 'login') {
+                  static::getLogger()->error('Authentication failed', $info);
+                }
+
                 NotificationUtility::dispatch(__CLASS__, 'authenticationFailed', $info);
             }
 
