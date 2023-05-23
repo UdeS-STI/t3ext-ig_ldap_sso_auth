@@ -139,7 +139,8 @@ class LdapGroup
             Ldap::getInstance()->escapeDnForFilter( $groupDN ),
             "(member=" . Ldap::getInstance()->escapeDnForFilter( $userDn ) . ")",
             array( 'cn' ) );
-        return ( $groups['count'] > 0 )? true : false;
+        $groupCount = $groups['count'] ?? 0;
+        return $groupCount > 0;
     }
 
 }
